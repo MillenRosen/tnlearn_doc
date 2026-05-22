@@ -21,7 +21,7 @@ from recommonmark.parser import CommonMarkParser
 
 project = 'Tnlearn'
 copyright = '2024, Finn'
-author = 'Wang Meng, Fenglei Fan, Juntong Fan'
+author = 'Wang Meng, Fenglei Fan, Juntong Fan, Tieyun LI'
 
 # The full version, including alpha/beta/rc tags
 release = 'v1'

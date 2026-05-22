@@ -9,7 +9,10 @@ API Reference
 +-----------------------------+-----------------------------------------+
 | ``tnlearn.MLPRegressor``    | MLPRegressor Class Implementation       |
 +-----------------------------+-----------------------------------------+
-
+| ``tnlearn.LLMSymRegressor`` | LLM-based Symbolic Regression Class     |
++-----------------------------+-----------------------------------------+
+| ``tnlearn.RLRegressor``     | Reinforcement Learning Regressor Class  |
++-----------------------------+-----------------------------------------+
 
 
 
@@ -322,3 +325,178 @@ tnlearn.MLPRegressor
         clf.save(path='my_model_dir', filename='mlp_regressor.pth')
         clf.load(path='my_model_dir', filename='mlp_regressor.pth', input_dim=X_train.shape[1], output_dim=1)
         clf.fit(X_train, y_train)
+
+tnlearn.LLMSymRegressor
+-----------------------
+- Description:
+    ``tnlearn.LLMSymRegressor`` implements an LLM-based symbolic regression agent. It combines large language model (LLM) generated equation skeletons with gradient‑free numerical optimization to discover interpretable mathematical expressions from data. The agent supports multiple LLM providers (DeepSeek, SiliconFlow, Ollama, BLT, CSTCloud) and uses an experience replay buffer to iteratively improve candidate equations.
+
+    .. container:: custom-background
+
+       ``tnlearn.LLMSymRegressor`` : :classtext:`class` **tnlearn.LLMSymRegressor** :classtext:`(llm_config=None, max_iterations=20, samples_per_iteration=8, background=None, random_state=None, verbose=True)`
+
+- **How to initialize your** ``LLMSymRegressor`` **:**
+    ``llm_config``: Dictionary configuring the LLM provider **(default: None)**
+
+        .. container:: custom-background-2
+
+            Must contain a ``model`` key in the format ``'provider/model'``, e.g. ``'deepseek/deepseek-chat'``.  
+            Optional keys: ``'api_key'`` (string or dict), ``'base_url'``, ``'temperature'`` (float, default 0.6), ``'max_tokens'`` (int, default 1024), ``'top_p'`` (float, default 0.3).  
+            If no ``api_key`` is given, the corresponding environment variable is used (e.g. ``DEEPSEEK_API_KEY``, ``SILICONFLOW_API_KEY``).
+
+    ``max_iterations``: Number of evolutionary iterations (rounds of LLM sampling + evaluation) **(default: 20)**
+
+    ``samples_per_iteration``: Number of candidate equations generated per iteration **(default: 8)**
+
+    ``background``: Optional physical background description to guide the LLM **(default: None)**
+
+    ``random_state``: Seed for random number generators for reproducibility **(default: None)**
+
+    ``verbose``: If ``True``, print detailed progress and intermediate results **(default: True)**
+
+- **Supported LLM Providers**
+
+    The following provider strings are recognised in the ``model`` field (case‑insensitive):
+
+    =============  =====================  ==================================
+    Provider       Example ``model``      Environment variable for API key
+    =============  =====================  ==================================
+    DeepSeek       ``deepseek/deepseek-chat``  ``DEEPSEEK_API_KEY``
+    SiliconFlow    ``siliconflow/Qwen/Qwen3-8B``  ``SILICONFLOW_API_KEY``
+    Ollama (local) ``ollama/llama3.1:8b``  (not required)
+    BLT            ``blt/gpt-4``          ``BLT_API_KEY``
+    CSTCloud       ``cstcloud/gpt-oss-120b``  ``CSTCLOUD_API_KEY``
+    =============  =====================  ==================================
+
+- **Attributes after fitting**
+
+    After calling ``fit()``, the following attributes are available:
+
+    - ``best_equation_``: the best discovered equation body (a string starting with ``return ...``).
+    - ``best_score_``: the highest negative MSE (the evaluation score, higher = better).
+    - ``best_params_``: a numpy array of optimized coefficients for ``params[0]``, ``params[1]``, etc.
+
+- **Here is an example of using** ``LLMSymRegressor`` **quickly:**
+
+    .. code-block:: python
+        :linenos:
+
+        from tnlearn import LLMSymRegressor
+        import numpy as np
+        from sklearn.model_selection import train_test_split
+        from sklearn.metrics import r2_score
+
+        # Generate synthetic data: y = 3*x0 + 0.5*sin(x1) + noise
+        np.random.seed(42)
+        X = np.random.randn(200, 2)
+        y = 3*X[:,0] + 0.5*np.sin(X[:,1]) + 0.1*np.random.randn(200)
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+        # Configure LLM (set DEEPSEEK_API_KEY environment variable)
+        llm_config = {'model': 'deepseek/deepseek-chat', 'temperature': 0.6}
+
+        reg = LLMSymRegressor(llm_config=llm_config, max_iterations=5, verbose=True)
+        reg.fit(X_train, y_train)
+
+        print("Best equation body:")
+        print(reg.best_equation_)
+        # Example output: "return params[0]*x0 + params[1]*np.sin(x1) + params[2]"
+
+        y_pred = reg.predict(X_test)
+        print(f"Test R²: {r2_score(y_test, y_pred):.4f}")
+
+        # Save and load the model
+        reg.save(path='my_model_dir', filename='llmsym_regressor.pth')
+        reg.load(path='my_model_dir', filename='llmsym_regressor.pth',
+                 input_dim=X_train.shape[1], output_dim=1)
+
+    .. note::
+        The ``fit`` method automatically performs parameter optimization (BFGS) on the discovered equation.  
+        The returned equation body uses placeholder parameters ``params[0]``, ``params[1]``, … which are replaced by the optimized values when calling ``predict``.
+
+        For more advanced usage (e.g., customising the prompt or using a different LLM provider), refer to the online documentation.
+
+
+tnlearn.RLRegressor
+-------------------
+- Description:
+    ``tnlearn.RLRegressor`` implements a reinforcement learning based symbolic regression algorithm. It uses a policy gradient method (REINFORCE) to train a recurrent neural network that generates mathematical expressions in prefix notation. The generated expressions are evaluated on the data, and the policy is updated to favour expressions with lower mean squared error. This approach is particularly effective for univariate symbolic regression (single input feature ``x``) and can automatically discover the underlying formula, including constants that can be further refined via L‑BFGS optimisation.
+
+    .. container:: custom-background
+
+       ``tnlearn.RLRegressor`` : :classtext:`class` **tnlearn.RLRegressor** :classtext:`(max_length=20, population_size=50, n_iter=200, learning_rate=0.001, hidden_size=64, risk_factor=0.1, device=None, random_state=None, verbose=1, patience=20, optimize_constants=True)`
+
+- **How to initialize your** ``RLRegressor`` **:**
+    ``max_length``: Maximum number of tokens in a generated expression **(default: 20)**
+
+    ``population_size``: Number of expressions sampled per iteration **(default: 50)**
+
+    ``n_iter``: Number of training iterations **(default: 200)**
+
+    ``learning_rate``: Learning rate for the policy network **(default: 0.001)**
+
+    ``hidden_size``: Size of the LSTM hidden state **(default: 64)**
+
+    ``risk_factor``: Fraction of top‑performing expressions used for policy update (e.g. 0.1 selects the top 10%) **(default: 0.1)**
+
+    ``device``: Computation device (``'cuda'`` or ``'cpu'``); if ``None``, automatically selects GPU if available **(default: None)**
+
+    ``random_state``: Seed for random number generators for reproducibility **(default: None)**
+
+    ``verbose``: Verbosity level; 0 = silent, 1 = print every 20 iterations **(default: 1)**
+
+    ``patience``: Early stopping patience (number of iterations without improvement) **(default: 20)**
+
+    ``optimize_constants``: Whether to refine constants using L‑BFGS after each generation **(default: True)**
+
+- **Supported operators and functions**
+
+    The grammar includes the following tokens:
+
+    - **Input**: ``x``
+    - **Constants**: ``const`` (learned placeholder)
+    - **Unary operators**: ``square``, ``cube``, ``log``, ``sqrt``, ``exp``, ``sin``, ``cos``, ``tanh``
+    - **Binary operators**: ``add``, ``sub``, ``mul``, ``div``
+
+- **Attributes after fitting**
+
+    - ``best_expression_``: the discovered equation in infix notation (e.g., ``(x + sin(x))``).
+    - ``best_score_``: the R² score of the best expression on the training data.
+    - ``best_loss_``: the mean squared error of the best expression.
+
+- **Here is an example of using** ``RLRegressor`` **quickly:**
+
+    .. code-block:: python
+        :linenos:
+
+        from tnlearn import RLRegressor
+        import numpy as np
+        from sklearn.model_selection import train_test_split
+        from sklearn.metrics import r2_score
+
+        # Generate synthetic univariate data: y = 2.5 * x**2 + 1.2*sin(x) + noise
+        np.random.seed(42)
+        X = np.random.uniform(-3, 3, 300).reshape(-1, 1)
+        y = 2.5 * X[:,0]**2 + 1.2 * np.sin(X[:,0]) + 0.05 * np.random.randn(300)
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+        reg = RLRegressor(max_length=15, population_size=60, n_iter=150,
+                          verbose=1, random_state=42)
+        reg.fit(X_train, y_train)
+
+        print("Best discovered equation:")
+        print(reg.get_expression())
+
+        y_pred = reg.predict(X_test)
+        print(f"Test R²: {r2_score(y_test, y_pred):.4f}")
+
+        # The model automatically handles constant optimisation – no need to call a separate routine.
+
+    .. warning::
+        The current implementation of ``RLRegressor`` only supports **univariate** regression (one input feature). Multivariate inputs will raise an error.
+
+    .. note::
+        The expressions are generated in prefix notation and internally converted to infix for readability.  
+        Constants are represented by the token ``const``, and their final values are optimised using L‑BFGS if ``optimize_constants=True``.

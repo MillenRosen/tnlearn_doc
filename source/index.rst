@@ -88,7 +88,7 @@ The Team
 - Meng Wang (`NewT123-WM <https://github.com/NewT123-WM>`_)
 - Fenglei Fan (`FengleiFan Fan <https://github.com/FengleiFan>`_)
 - Juntong Fan (`Juntongkuki <https://github.com/Juntongkuki>`_)
-
+- Tieyun LI (`MillenRosen <https://github.com/MillenRosen>`_)
 
 Citing
 ---------
