@@ -1,4 +1,3 @@
-
 API Reference
 ===========================
 
@@ -21,7 +20,8 @@ API Reference
 
 
 tnlearn.VecSymRegressor
-----------------
+-----------------------
+
 - Description:
     ``tnlearn.VecSymRegressor`` implements the symbolic regression algorithm through the Regressor class, enabling the evolution of mathematical expressions to fit given data. The class provides methods for generating random expressions, evaluating their fitness, and evolving expressions through mutation and crossover. It aims to find the best-fitting mathematical model for a given dataset.
 
@@ -55,7 +55,7 @@ tnlearn.VecSymRegressor
 
         .. container:: custom-background-2
 
-            **None:** Use the defult mathematical operations for the algorithm, like the following code:
+            **None:** Use the default mathematical operations for the algorithm, like the following code:
 
             .. code-block:: python
                 :linenos:
@@ -66,13 +66,14 @@ tnlearn.VecSymRegressor
                 {"func": operator.mul, "arg_count": 2, "format_str": "({} * {})"},
                 {"func": operator.neg, "arg_count": 1, "format_str": "-({})"},
                 )
+
             You can also define ``operations`` in a similar way.
 
 
 
 - **Here is an example of using** ``VecSymRegressor`` **quickly:**
 
-    .. code-block::
+    .. code-block:: text
 
         from tnlearn import Regressor
 
@@ -93,6 +94,7 @@ tnlearn.VecSymRegressor
 
 tnlearn.MLPClassifier
 ----------------------
+
 - Description:
     ``tnlearn.MLPClassifier`` implements the class MLPClassifier, which extends the functionality of the base class to build and train a Multi-layer Perceptron (MLP) model. MLPClassifier is designed to allow easy customization of the neural network structure, activation functions, and loss function used during training. It incorporates device selection to leverage available GPU resources, ensuring efficient computation. The class covers essential methods for model training, evaluation, and prediction, making it a flexible tool for supervised learning tasks in PyTorch.
 
@@ -211,8 +213,9 @@ tnlearn.MLPClassifier
 
 tnlearn.MLPRegressor
 --------------------
+
 - Description:
-    ``tnlearn.MLPRegressor`` embodies the MLPRegressor class, designed as an extension of BaseModel within a custom machine learning framework. It facilitates the creation and training of a multilayer perceptron (MLP) for regression tasks. Features of the class include the flexibility to define custom neural network architectures through parameters such as neuronal expression and layer structure, the utilization of various activation functions, and the incorporation of modern optimization algorithms and regularization techniques. Moreover, the class is equipped with optional GPU support for enhanced computational efficiency, as well as functionalitiesfor training visualization, validation, and model performance evaluation. This representation of an MLP is tailored to adapt to an array of regression problems while ensuring ease of use and extensibility.
+    ``tnlearn.MLPRegressor`` embodies the MLPRegressor class, designed as an extension of BaseModel within a custom machine learning framework. It facilitates the creation and training of a multilayer perceptron (MLP) for regression tasks. Features of the class include the flexibility to define custom neural network architectures through parameters such as neuronal expression and layer structure, the utilization of various activation functions, and the incorporation of modern optimization algorithms and regularization techniques. Moreover, the class is equipped with optional GPU support for enhanced computational efficiency, as well as functionalities for training visualization, validation, and model performance evaluation. This representation of an MLP is tailored to adapt to an array of regression problems while ensuring ease of use and extensibility.
 
     .. container:: custom-background
 
@@ -326,14 +329,16 @@ tnlearn.MLPRegressor
         clf.load(path='my_model_dir', filename='mlp_regressor.pth', input_dim=X_train.shape[1], output_dim=1)
         clf.fit(X_train, y_train)
 
+
 tnlearn.LLMSymRegressor
 -----------------------
+
 - Description:
     ``tnlearn.LLMSymRegressor`` implements an LLM-based symbolic regression agent. It combines large language model (LLM) generated equation skeletons with gradient‑free numerical optimization to discover interpretable mathematical expressions from data. The agent supports multiple LLM providers (DeepSeek, SiliconFlow, Ollama, BLT, CSTCloud) and uses an experience replay buffer to iteratively improve candidate equations.
 
     .. container:: custom-background
 
-       ``tnlearn.LLMSymRegressor`` : :classtext:`class` **tnlearn.LLMSymRegressor** :classtext:`(llm_config=None, max_iterations=20, samples_per_iteration=8, background=None, random_state=None, verbose=True)`
+       ``tnlearn.LLMSymRegressor`` : :classtext:`class` **tnlearn.LLMSymRegressor** :classtext:`(llm_config=None, max_iterations=20, samples_per_iteration=8, background=None, random_state=None, verbose=True, extra_prompt=None)`
 
 - **How to initialize your** ``LLMSymRegressor`` **:**
     ``llm_config``: Dictionary configuring the LLM provider **(default: None)**
@@ -352,21 +357,36 @@ tnlearn.LLMSymRegressor
 
     ``random_state``: Seed for random number generators for reproducibility **(default: None)**
 
-    ``verbose``: If ``True``, print detailed progress and intermediate results **(default: True)**
+    ``verbose``: Verbosity level. If int: 0=quiet, 1=basic progress, 2=detailed debug; if bool: True -> 1, False -> 0 **(default: True)**
+
+    ``extra_prompt``: Additional user-provided text appended to the prompt after the equation template **(default: None)**
 
 - **Supported LLM Providers**
 
     The following provider strings are recognised in the ``model`` field (case‑insensitive):
 
-    =============  =====================  ==================================
-    Provider       Example ``model``      Environment variable for API key
-    =============  =====================  ==================================
-    DeepSeek       ``deepseek/deepseek-chat``  ``DEEPSEEK_API_KEY``
-    SiliconFlow    ``siliconflow/Qwen/Qwen3-8B``  ``SILICONFLOW_API_KEY``
-    Ollama (local) ``ollama/llama3.1:8b``  (not required)
-    BLT            ``blt/gpt-4``          ``BLT_API_KEY``
-    CSTCloud       ``cstcloud/gpt-oss-120b``  ``CSTCLOUD_API_KEY``
-    =============  =====================  ==================================
+    .. list-table::
+       :header-rows: 1
+       :widths: auto
+
+       * - Provider
+         - Example ``model``
+         - Environment variable for API key
+       * - DeepSeek
+         - ``deepseek/deepseek-chat``
+         - ``DEEPSEEK_API_KEY``
+       * - SiliconFlow
+         - ``siliconflow/Qwen/Qwen3-8B``
+         - ``SILICONFLOW_API_KEY``
+       * - Ollama (local)
+         - ``ollama/llama3.1:8b``
+         - (not required)
+       * - BLT
+         - ``blt/gpt-4``
+         - ``BLT_API_KEY``
+       * - CSTCloud
+         - ``cstcloud/gpt-oss-120b``
+         - ``CSTCLOUD_API_KEY``
 
 - **Attributes after fitting**
 
@@ -396,7 +416,7 @@ tnlearn.LLMSymRegressor
         # Configure LLM (set DEEPSEEK_API_KEY environment variable)
         llm_config = {'model': 'deepseek/deepseek-chat', 'temperature': 0.6}
 
-        reg = LLMSymRegressor(llm_config=llm_config, max_iterations=5, verbose=True)
+        reg = LLMSymRegressor(llm_config=llm_config, max_iterations=5, verbose=1)
         reg.fit(X_train, y_train)
 
         print("Best equation body:")
@@ -420,50 +440,54 @@ tnlearn.LLMSymRegressor
 
 tnlearn.RLRegressor
 -------------------
+
 - Description:
-    ``tnlearn.RLRegressor`` implements a reinforcement learning based symbolic regression algorithm. It uses a policy gradient method (REINFORCE) to train a recurrent neural network that generates mathematical expressions in prefix notation. The generated expressions are evaluated on the data, and the policy is updated to favour expressions with lower mean squared error. This approach is particularly effective for univariate symbolic regression (single input feature ``x``) and can automatically discover the underlying formula, including constants that can be further refined via L‑BFGS optimisation.
+    ``tnlearn.RLRegressor`` implements a reinforcement learning (policy gradient) agent that selects a subset of basis functions (polynomials and optionally trigonometric terms) to form a symbolic expression. The agent explores the space of basis function combinations and uses Ridge regression to fit coefficients on the training set. The reward is the validation R² score. The discovered expression can be directly used as a neuron formula in MLPRegressor.
 
     .. container:: custom-background
 
-       ``tnlearn.RLRegressor`` : :classtext:`class` **tnlearn.RLRegressor** :classtext:`(max_length=20, population_size=50, n_iter=200, learning_rate=0.001, hidden_size=64, risk_factor=0.1, device=None, random_state=None, verbose=1, patience=20, optimize_constants=True)`
+       ``tnlearn.RLRegressor`` : :classtext:`class` **tnlearn.RLRegressor** :classtext:`(max_power=3, max_terms=5, max_freq=2, use_trigonometric=True, alpha=0.1, force_constant=True, random_state=42, max_episodes=100, val_split=0.2, lr_rl=1e-3, gamma=0.99, hidden_dim=64, verbose=True)`
 
 - **How to initialize your** ``RLRegressor`` **:**
-    ``max_length``: Maximum number of tokens in a generated expression **(default: 20)**
+    ``max_power``: Maximum exponent for polynomial terms (x**p) **(default: 3)**
 
-    ``population_size``: Number of expressions sampled per iteration **(default: 50)**
+    ``max_terms``: Maximum number of basis functions selected per expression **(default: 5)**
 
-    ``n_iter``: Number of training iterations **(default: 200)**
+    ``max_freq``: Maximum integer frequency for trigonometric functions (k in sin(k*x)) **(default: 2)**
 
-    ``learning_rate``: Learning rate for the policy network **(default: 0.001)**
+    ``use_trigonometric``: Whether to include sin(k*x), cos(k*x) and their products as candidates **(default: True)**
 
-    ``hidden_size``: Size of the LSTM hidden state **(default: 64)**
+    ``alpha``: Regularisation strength for Ridge regression **(default: 0.1)**
 
-    ``risk_factor``: Fraction of top‑performing expressions used for policy update (e.g. 0.1 selects the top 10%) **(default: 0.1)**
+    ``force_constant``: If True, the constant term (1) is always included **(default: True)**
 
-    ``device``: Computation device (``'cuda'`` or ``'cpu'``); if ``None``, automatically selects GPU if available **(default: None)**
+    ``random_state``: Random seed for reproducibility **(default: 42)**
 
-    ``random_state``: Seed for random number generators for reproducibility **(default: None)**
+    ``max_episodes``: Number of training episodes **(default: 100)**
 
-    ``verbose``: Verbosity level; 0 = silent, 1 = print every 20 iterations **(default: 1)**
+    ``val_split``: Fraction of training data used as validation for reward computation **(default: 0.2)**
 
-    ``patience``: Early stopping patience (number of iterations without improvement) **(default: 20)**
+    ``lr_rl``: Learning rate for the policy network **(default: 1e-3)**
 
-    ``optimize_constants``: Whether to refine constants using L‑BFGS after each generation **(default: True)**
+    ``gamma``: Discount factor for reward calculation **(default: 0.99)**
+
+    ``hidden_dim``: Number of neurons in the policy network's hidden layers **(default: 64)**
+
+    ``verbose``: If True, print progress updates during training **(default: True)**
 
 - **Supported operators and functions**
 
-    The grammar includes the following tokens:
+    The basis functions include:
 
-    - **Input**: ``x``
-    - **Constants**: ``const`` (learned placeholder)
-    - **Unary operators**: ``square``, ``cube``, ``log``, ``sqrt``, ``exp``, ``sin``, ``cos``, ``tanh``
-    - **Binary operators**: ``add``, ``sub``, ``mul``, ``div``
+    - **Polynomial terms**: ``x**p`` (p = 1..max_power)
+    - **Trigonometric terms** (if enabled): ``torch.sin(k*x)``, ``torch.cos(k*x)``, and their products with powers of x and with each other.
+    - **Constant term** (always forced if ``force_constant=True``)
 
 - **Attributes after fitting**
 
-    - ``best_expression_``: the discovered equation in infix notation (e.g., ``(x + sin(x))``).
-    - ``best_score_``: the R² score of the best expression on the training data.
-    - ``best_loss_``: the mean squared error of the best expression.
+    - ``best_expr``: the best discovered symbolic expression (with numeric coefficients).
+    - ``best_score``: the best validation R² score achieved.
+    - ``neuron``: alias for ``best_expr``, compatible with MLPRegressor.
 
 - **Here is an example of using** ``RLRegressor`` **quickly:**
 
@@ -475,28 +499,30 @@ tnlearn.RLRegressor
         from sklearn.model_selection import train_test_split
         from sklearn.metrics import r2_score
 
-        # Generate synthetic univariate data: y = 2.5 * x**2 + 1.2*sin(x) + noise
+        # Generate synthetic univariate data: y = 2.5 * x**2 + 1.2*sin(2*x) + noise
         np.random.seed(42)
         X = np.random.uniform(-3, 3, 300).reshape(-1, 1)
-        y = 2.5 * X[:,0]**2 + 1.2 * np.sin(X[:,0]) + 0.05 * np.random.randn(300)
+        y = 2.5 * X[:,0]**2 + 1.2 * np.sin(2 * X[:,0]) + 0.05 * np.random.randn(300)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
-        reg = RLRegressor(max_length=15, population_size=60, n_iter=150,
-                          verbose=1, random_state=42)
+        reg = RLRegressor(max_episodes=200, max_terms=4, use_trigonometric=True, verbose=True)
         reg.fit(X_train, y_train)
 
-        print("Best discovered equation:")
-        print(reg.get_expression())
+        print("Best discovered expression:")
+        print(reg.get_neuron())   # e.g., "2.50@x**2 + 1.20@torch.sin(2*x) + 0.05"
 
         y_pred = reg.predict(X_test)
         print(f"Test R²: {r2_score(y_test, y_pred):.4f}")
 
-        # The model automatically handles constant optimisation – no need to call a separate routine.
+        # Use the discovered neuron in MLPRegressor
+        from tnlearn import MLPRegressor
+        mlp = MLPRegressor(neurons=reg.get_neuron(), layers_list=[30,20])
+        mlp.fit(X_train, y_train)
 
     .. warning::
         The current implementation of ``RLRegressor`` only supports **univariate** regression (one input feature). Multivariate inputs will raise an error.
 
     .. note::
-        The expressions are generated in prefix notation and internally converted to infix for readability.  
-        Constants are represented by the token ``const``, and their final values are optimised using L‑BFGS if ``optimize_constants=True``.
+        The discovered expression uses ``@`` to separate coefficient and function, which is directly compatible with the ``neurons`` parameter of ``MLPRegressor``.  
+        The trigonometric functions are expressed as ``torch.sin(...)`` and ``torch.cos(...)``, ensuring seamless integration with PyTorch.

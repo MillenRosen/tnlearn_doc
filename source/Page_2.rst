@@ -18,7 +18,7 @@ What Are Task-based Neurons?
 ----------------------------
 
 1. Vectorized Symbolic Regression
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
 Unlike traditional regression algorithms that fit numerical coefficients, symbolic regression first encodes a formula into a tree structure and then uses a genetic algorithm to explore the space of possible mathematical expressions to identify the best formula. Because no gradients with respect to the mathematical formula can be computed, the most common technique for solving symbolic regression problems is genetic programming (GP) [14]_. GP is a powerful population-based evolutionary algorithm, which mainly uses crossover and mutation to generate new formulas. The following two figures illustrate the schematic diagrams of crossover and mutation respectively.
 
