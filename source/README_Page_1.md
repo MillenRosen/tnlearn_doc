@@ -160,9 +160,11 @@ Here's our official API documentation, available on Read the Docs.
 If you find Tnlearn useful, please cite it in your publications.
 
 ```bibtex
-@article{
-
-
+@article{fan2024no,
+  title={No One-Size-Fits-All Neurons: Task-based Neurons for Artificial Neural Networks},
+  author={Fan, Feng-Lei and Wang, Meng and Dong, Hang-Cheng and Ma, Jianwei and Zeng, Tieyong},
+  journal={arXiv preprint arXiv:2405.02369},
+  year={2024}
 }
 ```
 
@@ -178,7 +180,7 @@ Tnlearn is a work by [Meng Wang](https://github.com/NewT123-WM), [Juntong Fan](h
 
 ## License
 
-Tnlearn is released under the BSD 3-Clause License.
+Tnlearn is released under the Apache 2.0 License.
 
 
 ## What's Next?

@@ -97,16 +97,15 @@ If you find ``tnlearn`` useful, please cite it in your publications.
 .. code-block:: bibtex
 
    @article{fan2024no,
-   title={No One-Size-Fits-All Neurons: Task-based Neurons for Artificial Neural Networks},
-   author={Fan, Feng-Lei and Wang, Meng and Dong, Hang-Cheng and Ma, Jianwei and Zeng, Tieyong},
-   journal={arXiv preprint arXiv:2405.02369},
-   year={2024}
+     title={No One-Size-Fits-All Neurons: Task-based Neurons for Artificial Neural Networks},
+     author={Fan, Feng-Lei and Wang, Meng and Dong, Hang-Cheng and Ma, Jianwei and Zeng, Tieyong},
+     journal={arXiv preprint arXiv:2405.02369},
+     year={2024}
    }
 
 License
 -------
 ``tnlearn`` is released under the Apache 2.0 License.
-
 
 About Version Update
 ---------------------
