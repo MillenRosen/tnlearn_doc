@@ -334,7 +334,7 @@ tnlearn.LLMSymRegressor
 -----------------------
 
 - Description:
-    ``tnlearn.LLMSymRegressor`` implements an LLM-based symbolic regression agent. It combines large language model (LLM) generated equation skeletons with gradient‑free numerical optimization to discover interpretable mathematical expressions from data. The agent supports multiple LLM providers (DeepSeek, SiliconFlow, Ollama, BLT, CSTCloud) and uses an experience replay buffer to iteratively improve candidate equations.
+    ``tnlearn.LLMSymRegressor`` implements an LLM-based symbolic regression agent. It combines LLM‑generated equation skeletons with numerical optimization to discover interpretable expressions. The discovered expression can be directly used as a neuron formula in ``MLPRegressor``. The agent supports multiple LLM providers (DeepSeek, SiliconFlow, Ollama, BLT, CSTCloud) and uses an experience replay buffer to iteratively improve candidate equations.
 
     .. container:: custom-background
 
@@ -394,55 +394,39 @@ tnlearn.LLMSymRegressor
 
     - ``best_equation_``: the best discovered equation body (a string starting with ``return ...``).
     - ``best_score_``: the highest negative MSE (the evaluation score, higher = better).
-    - ``best_params_``: a numpy array of optimized coefficients for ``params[0]``, ``params[1]``, etc.
+    - ``best_params_``: a numpy array of optimized coefficients for ``params[0]``, ``params[1]``, ….
+    - ``neuron``: a string with numeric coefficients, ready to be used as the ``neurons`` argument in ``MLPRegressor``.
 
 - **Here is an example of using** ``LLMSymRegressor`` **quickly:**
 
     .. code-block:: python
         :linenos:
 
-        from tnlearn import LLMSymRegressor
-        import numpy as np
+        from tnlearn import LLMSymRegressor, MLPRegressor
+        from sklearn.datasets import make_regression
         from sklearn.model_selection import train_test_split
-        from sklearn.metrics import r2_score
 
-        # Generate synthetic data: y = 3*x0 + 0.5*sin(x1) + noise
-        np.random.seed(42)
-        X = np.random.randn(200, 2)
-        y = 3*X[:,0] + 0.5*np.sin(X[:,1]) + 0.1*np.random.randn(200)
+        X, y = make_regression(n_samples=200, random_state=1)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        llm_config = {'model': 'deepseek/deepseek-chat'}   # set DEEPSEEK_API_KEY environment variable
 
-        # Configure LLM (set DEEPSEEK_API_KEY environment variable)
-        llm_config = {'model': 'deepseek/deepseek-chat', 'temperature': 0.6}
+        neuron = LLMSymRegressor(llm_config=llm_config, max_iterations=5)
+        neuron.fit(X_train, y_train)
 
-        reg = LLMSymRegressor(llm_config=llm_config, max_iterations=5, verbose=1)
-        reg.fit(X_train, y_train)
-
-        print("Best equation body:")
-        print(reg.best_equation_)
-        # Example output: "return params[0]*x0 + params[1]*np.sin(x1) + params[2]"
-
-        y_pred = reg.predict(X_test)
-        print(f"Test R²: {r2_score(y_test, y_pred):.4f}")
-
-        # Save and load the model
-        reg.save(path='my_model_dir', filename='llmsym_regressor.pth')
-        reg.load(path='my_model_dir', filename='llmsym_regressor.pth',
-                 input_dim=X_train.shape[1], output_dim=1)
+        clf = MLPRegressor(neurons=neuron.neuron, layers_list=[50,30,10])
+        clf.fit(X_train, y_train)
+        clf.predict(X_test)
 
     .. note::
-        The ``fit`` method automatically performs parameter optimization (BFGS) on the discovered equation.  
-        The returned equation body uses placeholder parameters ``params[0]``, ``params[1]``, … which are replaced by the optimized values when calling ``predict``.
-
-        For more advanced usage (e.g., customising the prompt or using a different LLM provider), refer to the online documentation.
+        The ``fit`` method automatically performs BFGS parameter optimization. The resulting ``neuron`` attribute contains a numeric expression (e.g. ``3.0@x**2 + 2.0@x + 0.1``) that can be passed directly to the ``neurons`` parameter of ``MLPRegressor``.
 
 
 tnlearn.RLRegressor
 -------------------
 
 - Description:
-    ``tnlearn.RLRegressor`` implements a reinforcement learning (policy gradient) agent that selects a subset of basis functions (polynomials and optionally trigonometric terms) to form a symbolic expression. The agent explores the space of basis function combinations and uses Ridge regression to fit coefficients on the training set. The reward is the validation R² score. The discovered expression can be directly used as a neuron formula in MLPRegressor.
+    ``tnlearn.RLRegressor`` implements a reinforcement learning (policy gradient) agent that selects a subset of basis functions (polynomials and optionally trigonometric terms) to form a symbolic expression. The agent explores the space of basis function combinations and uses Ridge regression to fit coefficients on the training set. The reward is the validation R² score. The discovered expression can be directly used as a neuron formula in ``MLPRegressor``.
 
     .. container:: custom-background
 
@@ -475,9 +459,7 @@ tnlearn.RLRegressor
 
     ``verbose``: If True, print progress updates during training **(default: True)**
 
-- **Supported operators and functions**
-
-    The basis functions include:
+- **Supported basis functions**
 
     - **Polynomial terms**: ``x**p`` (p = 1..max_power)
     - **Trigonometric terms** (if enabled): ``torch.sin(k*x)``, ``torch.cos(k*x)``, and their products with powers of x and with each other.
@@ -487,42 +469,33 @@ tnlearn.RLRegressor
 
     - ``best_expr``: the best discovered symbolic expression (with numeric coefficients).
     - ``best_score``: the best validation R² score achieved.
-    - ``neuron``: alias for ``best_expr``, compatible with MLPRegressor.
+    - ``neuron``: alias for ``best_expr``, compatible with the ``neurons`` parameter of ``MLPRegressor``.
 
 - **Here is an example of using** ``RLRegressor`` **quickly:**
 
     .. code-block:: python
         :linenos:
 
-        from tnlearn import RLRegressor
+        from tnlearn import RLRegressor, MLPRegressor
         import numpy as np
         from sklearn.model_selection import train_test_split
-        from sklearn.metrics import r2_score
 
-        # Generate synthetic univariate data: y = 2.5 * x**2 + 1.2*sin(2*x) + noise
-        np.random.seed(42)
-        X = np.random.uniform(-3, 3, 300).reshape(-1, 1)
+        X = np.random.uniform(-3, 3, (300, 1))
         y = 2.5 * X[:,0]**2 + 1.2 * np.sin(2 * X[:,0]) + 0.05 * np.random.randn(300)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
-        reg = RLRegressor(max_episodes=200, max_terms=4, use_trigonometric=True, verbose=True)
-        reg.fit(X_train, y_train)
+        rl = RLRegressor(max_episodes=200, max_terms=4, use_trigonometric=True, verbose=True)
+        rl.fit(X_train, y_train)
 
-        print("Best discovered expression:")
-        print(reg.get_neuron())   # e.g., "2.50@x**2 + 1.20@torch.sin(2*x) + 0.05"
-
-        y_pred = reg.predict(X_test)
-        print(f"Test R²: {r2_score(y_test, y_pred):.4f}")
-
-        # Use the discovered neuron in MLPRegressor
-        from tnlearn import MLPRegressor
-        mlp = MLPRegressor(neurons=reg.get_neuron(), layers_list=[30,20])
+        expr = rl.get_neuron()
+        mlp = MLPRegressor(neurons=expr, layers_list=[30,20])
         mlp.fit(X_train, y_train)
+        mlp.predict(X_test)
 
     .. warning::
         The current implementation of ``RLRegressor`` only supports **univariate** regression (one input feature). Multivariate inputs will raise an error.
 
     .. note::
         The discovered expression uses ``@`` to separate coefficient and function, which is directly compatible with the ``neurons`` parameter of ``MLPRegressor``.  
-        The trigonometric functions are expressed as ``torch.sin(...)`` and ``torch.cos(...)``, ensuring seamless integration with PyTorch.
+        Trigonometric functions are expressed as ``torch.sin(...)`` and ``torch.cos(...)``, ensuring seamless integration with PyTorch.
