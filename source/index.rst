@@ -11,7 +11,7 @@ TNLearn: Task-based Neurons for Learning
 
 .. image:: https://img.shields.io/badge/Python-3.9%2B-brightgreen.svg
    :target: https://github.com/NewT123-WM/tnlearn
-.. image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
+.. image:: https://img.shields.io/badge/License-Apache%202.0-blue.svg
    :target: https://github.com/NewT123-WM/tnlearn
 .. image:: https://img.shields.io/badge/pypi-v0.1.0-orange?logo=PyPI
    :target: https://github.com/NewT123-WM/tnlearn
