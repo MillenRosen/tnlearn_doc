@@ -499,3 +499,896 @@ tnlearn.RLRegressor
     .. note::
         The discovered expression uses ``@`` to separate coefficient and function, which is directly compatible with the ``neurons`` parameter of ``MLPRegressor``.  
         Trigonometric functions are expressed as ``torch.sin(...)`` and ``torch.cos(...)``, ensuring seamless integration with PyTorch.
+
+tnlearn.modules – Task‑based Neural Modules
+============================================
+
+The ``tnlearn.modules`` subpackage provides a family of neural network layers that extend standard PyTorch layers (linear, convolutional, and recurrent) by allowing the user to specify a **symbolic expression** as the neuron's aggregation function. This enables the construction of task‑specific neurons directly within popular architectures.
+
+All modules follow a unified mathematical framework: the input (or hidden state) is transformed by a set of user‑defined basis functions :math:`f_i`, and the results are linearly combined with learnable weights :math:`W_i`:
+
+.. math::
+
+   \text{output} = \sum_{i} W_i \cdot f_i(\text{input}) + b
+
+where :math:`\cdot` denotes the appropriate linear operation (matrix multiplication, convolution, or transposed convolution). Each basis function has its own learnable weight, providing both flexibility and interpretability.
+
+**Example of symbolic expression interpretation**
+
+Suppose you set ``symbolic_expression = '2@x + 4@x**3 + torch.sin(x)'``. This indicates the use of three basis functions:
+
+- :math:`f_1(x) = x`
+- :math:`f_2(x) = x^3`
+- :math:`f_3(x) = \sin(x)`
+
+The layer will learn three weight matrices :math:`W_1, W_2, W_3` (or convolution kernels) and compute:
+
+.. math::
+
+   \text{output} = W_1 \cdot x + W_2 \cdot x^3 + W_3 \cdot \sin(x) + b
+
+where :math:`x` is the input tensor. All operations (:math:`x`, :math:`x^3`, :math:`\sin(x)`) are **element‑wise** over the input features (or spatial dimensions for convolutions). The coefficients ``2@`` and ``4@`` are ignored because the layer learns its own weights; they are only for parsing convenience.
+
+.. contents:: :local:
+
+
+TNLinear
+--------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNLinear`` : :classtext:`class` **TNLinear** :classtext:`(in_features, out_features, symbolic_expression='x', bias=True, device=None, dtype=None)`
+
+- Description:
+    A custom **fully‑connected layer with task‑based neurons**, where the neuron's aggregation function is defined by a symbolic expression. The input is first transformed by each basis function in the expression, and the results are linearly combined with learnable weights:
+
+    .. math::
+
+       y = \sum_{i} W_i \, f_i(x) + b
+
+    The coefficients (e.g., ``3@`` and ``4@`` in ``'3@x + 4@x**3 + torch.sin(x)'``) are **ignored**; the layer learns its own weight for each basis function. When ``symbolic_expression='x'``, this layer reduces to a standard affine transformation (equivalent to ``nn.Linear``).
+
+    This module supports TensorFloat32.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``in_features`` : size of each input sample **(default: required)**
+
+        ``out_features`` : size of each output sample **(default: required)**
+
+        ``symbolic_expression`` : string defining the basis functions, e.g., ``'x + torch.sin(x) + x**3'`` or ``'3@x + 4@x**3 + torch.sin(x)'``. The variable ``x`` represents the input. The layer learns its own weights for each basis function, so numeric coefficients are ignored. **(default: 'x')**
+
+        ``bias`` : If set to ``False``, the layer will not learn an additive bias. **(default: True)**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(*, H_{in})` where :math:`H_{in} = \text{in_features}` and :math:`*` means any number of dimensions.
+    - Output: :math:`(*, H_{out})` where all but the last dimension are the same shape as the input and :math:`H_{out} = \text{out_features}`.
+
+- **Variables**
+
+    - ``weight`` : the learnable weights of the module of shape :math:`(\text{out_features}, \text{in_features})` per basis function. Initialized from :math:`\mathcal{U}(-\sqrt{k}, \sqrt{k})` where :math:`k = \frac{1}{\text{in_features}}`.
+    - ``bias`` : the learnable bias of the module of shape :math:`(\text{out_features})`. If ``bias`` is ``True``, initialized from :math:`\mathcal{U}(-\sqrt{k}, \sqrt{k})` where :math:`k = \frac{1}{\text{in_features}}`.
+
+- **Examples**
+
+    .. code-block:: python
+
+        from tnlearn import TNLinear
+        import torch
+
+        # Example 1: using multiple basis functions
+        m1 = TNLinear(20, 30, symbolic_expression='x + torch.sin(x)')
+        input1 = torch.randn(128, 20)
+        output1 = m1(input1)
+
+        # Example 2: using a symbolic expression with coefficients (ignored)
+        m2 = TNLinear(20, 30, symbolic_expression='3@x + 4@x**3 + torch.sin(x)')
+        input2 = torch.randn(128, 20)
+        output2 = m2(input2)
+        print(output2.size())   # torch.Size([128, 30])
+
+
+TNConv1d
+--------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNConv1d`` : :classtext:`class` **TNConv1d** :classtext:`(in_channels, out_channels, kernel_size, stride=1, padding=0, symbolic_expression='x', groups=1, dilation=1, padding_mode='zeros', bias=True, device=None, dtype=None)`
+
+- Description:
+    Applies a 1D convolution over an input signal composed of several input planes, where the input is first transformed by a set of basis functions defined by ``symbolic_expression``:
+
+    .. math::
+
+       \text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) + \sum_{k=0}^{C_{\text{in}}-1} \sum_{m} W_m \star f_m(\text{input}(N_i, k))
+
+    where :math:`\star` is the valid cross-correlation operator, and :math:`f_m` are the basis functions.
+
+    All parameters are identical to those of :class:`torch.nn.Conv1d`, with the addition of ``symbolic_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``in_channels`` : number of channels in the input image **(default: required)**
+
+        ``out_channels`` : number of channels produced by the convolution **(default: required)**
+
+        ``kernel_size`` : size of the convolving kernel **(default: required)**
+
+        ``stride`` : stride of the convolution **(default: 1)**
+
+        ``padding`` : padding added to both sides of the input **(default: 0)**
+
+        ``symbolic_expression`` : basis functions to apply element‑wise to the input (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``groups`` : number of blocked connections from input channels to output channels **(default: 1)**
+
+        ``dilation`` : spacing between kernel elements **(default: 1)**
+
+        ``padding_mode`` : ``'zeros'``, ``'reflect'``, ``'replicate'`` or ``'circular'`` **(default: 'zeros')**
+
+        ``bias`` : if ``True``, adds a learnable bias to the output **(default: True)**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(N, C_{in}, L_{in})`
+    - Output: :math:`(N, C_{out}, L_{out})` where
+
+      .. math::
+
+         \begin{aligned}
+         L_{out} = \Big\lfloor & \frac{L_{in} + 2 \times \text{padding} - \text{dilation} \times (\text{kernel_size} - 1) - 1}{\text{stride}} \Big\rfloor + 1
+         \end{aligned}
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNConv1d
+        import torch
+
+        m = TNConv1d(16, 33, 3, stride=2, symbolic_expression='x + torch.sin(x)')
+        input = torch.randn(20, 16, 50)
+        output = m(input)
+
+
+TNConv2d
+--------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNConv2d`` : :classtext:`class` **TNConv2d** :classtext:`(in_channels, out_channels, kernel_size, stride=1, padding=0, symbolic_expression='x', groups=1, dilation=1, padding_mode='zeros', bias=True, device=None, dtype=None)`
+
+- Description:
+    Applies a 2D convolution over an input signal composed of several input planes, where the input is first transformed by a set of basis functions defined by ``symbolic_expression``:
+
+    .. math::
+
+       \text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) + \sum_{k=0}^{C_{\text{in}}-1} \sum_{m} W_m \star f_m(\text{input}(N_i, k))
+
+    where :math:`\star` is the valid 2D cross-correlation operator, and :math:`f_m` are the basis functions.
+
+    All parameters are identical to those of :class:`torch.nn.Conv2d`, with the addition of ``symbolic_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``in_channels`` : number of channels in the input image **(default: required)**
+
+        ``out_channels`` : number of channels produced by the convolution **(default: required)**
+
+        ``kernel_size`` : size of the convolving kernel **(default: required)**
+
+        ``stride`` : stride of the convolution **(default: 1)**
+
+        ``padding`` : padding added to all four sides of the input **(default: 0)**
+
+        ``symbolic_expression`` : basis functions to apply element‑wise to the input (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``groups`` : number of blocked connections from input channels to output channels **(default: 1)**
+
+        ``dilation`` : spacing between kernel elements **(default: 1)**
+
+        ``padding_mode`` : ``'zeros'``, ``'reflect'``, ``'replicate'`` or ``'circular'`` **(default: 'zeros')**
+
+        ``bias`` : if ``True``, adds a learnable bias to the output **(default: True)**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(N, C_{in}, H_{in}, W_{in})`
+    - Output: :math:`(N, C_{out}, H_{out}, W_{out})` where
+
+      .. math::
+
+         \begin{aligned}
+         H_{out} = \Big\lfloor & \frac{H_{in} + 2 \times \text{padding}[0] - \text{dilation}[0] \times (\text{kernel_size}[0] - 1) - 1}{\text{stride}[0]} \Big\rfloor + 1
+         \end{aligned}
+
+      .. math::
+
+         \begin{aligned}
+         W_{out} = \Big\lfloor & \frac{W_{in} + 2 \times \text{padding}[1] - \text{dilation}[1] \times (\text{kernel_size}[1] - 1) - 1}{\text{stride}[1]} \Big\rfloor + 1
+         \end{aligned}
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNConv2d
+        import torch
+
+        m = TNConv2d(16, 33, 3, stride=2, symbolic_expression='x + 0.5@x**2')
+        input = torch.randn(20, 16, 50, 100)
+        output = m(input)
+
+
+TNConv3d
+--------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNConv3d`` : :classtext:`class` **TNConv3d** :classtext:`(in_channels, out_channels, kernel_size, stride=1, padding=0, symbolic_expression='x', groups=1, dilation=1, padding_mode='zeros', bias=True, device=None, dtype=None)`
+
+- Description:
+    Applies a 3D convolution over an input signal composed of several input planes, where the input is first transformed by a set of basis functions defined by ``symbolic_expression``:
+
+    .. math::
+
+       \text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) + \sum_{k=0}^{C_{\text{in}}-1} \sum_{m} W_m \star f_m(\text{input}(N_i, k))
+
+    where :math:`\star` is the valid 3D cross-correlation operator, and :math:`f_m` are the basis functions.
+
+    All parameters are identical to those of :class:`torch.nn.Conv3d`, with the addition of ``symbolic_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``in_channels`` : number of channels in the input image **(default: required)**
+
+        ``out_channels`` : number of channels produced by the convolution **(default: required)**
+
+        ``kernel_size`` : size of the convolving kernel **(default: required)**
+
+        ``stride`` : stride of the convolution **(default: 1)**
+
+        ``padding`` : padding added to all sides of the input **(default: 0)**
+
+        ``symbolic_expression`` : basis functions to apply element‑wise to the input (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``groups`` : number of blocked connections from input channels to output channels **(default: 1)**
+
+        ``dilation`` : spacing between kernel elements **(default: 1)**
+
+        ``padding_mode`` : ``'zeros'``, ``'reflect'``, ``'replicate'`` or ``'circular'`` **(default: 'zeros')**
+
+        ``bias`` : if ``True``, adds a learnable bias to the output **(default: True)**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(N, C_{in}, D_{in}, H_{in}, W_{in})`
+    - Output: :math:`(N, C_{out}, D_{out}, H_{out}, W_{out})` where
+
+      .. math::
+
+         \begin{aligned}
+         D_{out} = \Big\lfloor & \frac{D_{in} + 2 \times \text{padding}[0] - \text{dilation}[0] \times (\text{kernel_size}[0] - 1) - 1}{\text{stride}[0]} \Big\rfloor + 1
+         \end{aligned}
+
+      .. math::
+
+         \begin{aligned}
+         H_{out} = \Big\lfloor & \frac{H_{in} + 2 \times \text{padding}[1] - \text{dilation}[1] \times (\text{kernel_size}[1] - 1) - 1}{\text{stride}[1]} \Big\rfloor + 1
+         \end{aligned}
+
+      .. math::
+
+         \begin{aligned}
+         W_{out} = \Big\lfloor & \frac{W_{in} + 2 \times \text{padding}[2] - \text{dilation}[2] \times (\text{kernel_size}[2] - 1) - 1}{\text{stride}[2]} \Big\rfloor + 1
+         \end{aligned}
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNConv3d
+        import torch
+
+        m = TNConv3d(16, 33, 3, stride=2, symbolic_expression='x + torch.cos(x)')
+        input = torch.randn(20, 16, 10, 50, 100)
+        output = m(input)
+
+
+TNConvTranspose1d
+-----------------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNConvTranspose1d`` : :classtext:`class` **TNConvTranspose1d** :classtext:`(in_channels, out_channels, kernel_size, stride=1, padding=0, output_padding=0, symbolic_expression='x', groups=1, bias=True, dilation=1, padding_mode='zeros', device=None, dtype=None)`
+
+- Description:
+    Applies a 1D transposed convolution operator over an input signal composed of several input planes, where the input is first transformed by a set of basis functions defined by ``symbolic_expression``:
+
+    .. math::
+
+       \text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) + \sum_{k=0}^{C_{\text{in}}-1} \sum_{m} W_m \circledast f_m(\text{input}(N_i, k))
+
+    where :math:`\circledast` is the transposed convolution operator, and :math:`f_m` are the basis functions.
+
+    All parameters are identical to those of :class:`torch.nn.ConvTranspose1d`, with the addition of ``symbolic_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``in_channels`` : number of channels in the input image **(default: required)**
+
+        ``out_channels`` : number of channels produced by the convolution **(default: required)**
+
+        ``kernel_size`` : size of the convolving kernel **(default: required)**
+
+        ``stride`` : stride of the convolution **(default: 1)**
+
+        ``padding`` : ``dilation * (kernel_size - 1) - padding`` zero-padding will be added to both sides of the input **(default: 0)**
+
+        ``output_padding`` : additional size added to one side of the output shape **(default: 0)**
+
+        ``symbolic_expression`` : basis functions to apply element‑wise to the input (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``groups`` : number of blocked connections from input channels to output channels **(default: 1)**
+
+        ``bias`` : if ``True``, adds a learnable bias to the output **(default: True)**
+
+        ``dilation`` : spacing between kernel elements **(default: 1)**
+
+        ``padding_mode`` : ``'zeros'``, ``'reflect'``, ``'replicate'`` or ``'circular'`` **(default: 'zeros')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(N, C_{in}, L_{in})`
+    - Output: :math:`(N, C_{out}, L_{out})` where
+
+      .. math::
+
+         \begin{aligned}
+         L_{out} = &(L_{in} - 1) \times \text{stride} - 2 \times \text{padding} \\
+                   &+ \text{dilation} \times (\text{kernel_size} - 1) + \text{output_padding} + 1
+         \end{aligned}
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNConvTranspose1d
+        import torch
+
+        m = TNConvTranspose1d(16, 33, 3, stride=2, symbolic_expression='x**2')
+        input = torch.randn(20, 16, 50)
+        output = m(input)
+
+
+TNConvTranspose2d
+-----------------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNConvTranspose2d`` : :classtext:`class` **TNConvTranspose2d** :classtext:`(in_channels, out_channels, kernel_size, stride=1, padding=0, output_padding=0, symbolic_expression='x', groups=1, bias=True, dilation=1, padding_mode='zeros', device=None, dtype=None)`
+
+- Description:
+    Applies a 2D transposed convolution operator over an input signal composed of several input planes, where the input is first transformed by a set of basis functions defined by ``symbolic_expression``:
+
+    .. math::
+
+       \text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) + \sum_{k=0}^{C_{\text{in}}-1} \sum_{m} W_m \circledast f_m(\text{input}(N_i, k))
+
+    where :math:`\circledast` is the transposed convolution operator, and :math:`f_m` are the basis functions.
+
+    All parameters are identical to those of :class:`torch.nn.ConvTranspose2d`, with the addition of ``symbolic_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``in_channels`` : number of channels in the input image **(default: required)**
+
+        ``out_channels`` : number of channels produced by the convolution **(default: required)**
+
+        ``kernel_size`` : size of the convolving kernel **(default: required)**
+
+        ``stride`` : stride of the convolution **(default: 1)**
+
+        ``padding`` : ``dilation * (kernel_size - 1) - padding`` zero-padding will be added to both sides of each spatial dimension **(default: 0)**
+
+        ``output_padding`` : additional size added to one side of each spatial dimension of the output shape **(default: 0)**
+
+        ``symbolic_expression`` : basis functions to apply element‑wise to the input (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``groups`` : number of blocked connections from input channels to output channels **(default: 1)**
+
+        ``bias`` : if ``True``, adds a learnable bias to the output **(default: True)**
+
+        ``dilation`` : spacing between kernel elements **(default: 1)**
+
+        ``padding_mode`` : ``'zeros'``, ``'reflect'``, ``'replicate'`` or ``'circular'`` **(default: 'zeros')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(N, C_{in}, H_{in}, W_{in})`
+    - Output: :math:`(N, C_{out}, H_{out}, W_{out})` where
+
+      .. math::
+
+         \begin{aligned}
+         H_{out} = &(H_{in} - 1) \times \text{stride}[0] - 2 \times \text{padding}[0] \\
+                   &+ \text{dilation}[0] \times (\text{kernel_size}[0] - 1) + \text{output_padding}[0] + 1
+         \end{aligned}
+
+      .. math::
+
+         \begin{aligned}
+         W_{out} = &(W_{in} - 1) \times \text{stride}[1] - 2 \times \text{padding}[1] \\
+                   &+ \text{dilation}[1] \times (\text{kernel_size}[1] - 1) + \text{output_padding}[1] + 1
+         \end{aligned}
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNConvTranspose2d
+        import torch
+
+        m = TNConvTranspose2d(16, 33, 3, stride=2, symbolic_expression='x + torch.sin(x)')
+        input = torch.randn(20, 16, 50, 100)
+        output = m(input)
+
+
+TNConvTranspose3d
+-----------------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNConvTranspose3d`` : :classtext:`class` **TNConvTranspose3d** :classtext:`(in_channels, out_channels, kernel_size, stride=1, padding=0, output_padding=0, symbolic_expression='x', groups=1, bias=True, dilation=1, padding_mode='zeros', device=None, dtype=None)`
+
+- Description:
+    Applies a 3D transposed convolution operator over an input signal composed of several input planes, where the input is first transformed by a set of basis functions defined by ``symbolic_expression``:
+
+    .. math::
+
+       \text{out}(N_i, C_{\text{out}_j}) = \text{bias}(C_{\text{out}_j}) + \sum_{k=0}^{C_{\text{in}}-1} \sum_{m} W_m \circledast f_m(\text{input}(N_i, k))
+
+    where :math:`\circledast` is the transposed convolution operator, and :math:`f_m` are the basis functions.
+
+    All parameters are identical to those of :class:`torch.nn.ConvTranspose3d`, with the addition of ``symbolic_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``in_channels`` : number of channels in the input image **(default: required)**
+
+        ``out_channels`` : number of channels produced by the convolution **(default: required)**
+
+        ``kernel_size`` : size of the convolving kernel **(default: required)**
+
+        ``stride`` : stride of the convolution **(default: 1)**
+
+        ``padding`` : ``dilation * (kernel_size - 1) - padding`` zero-padding will be added to both sides of each spatial dimension **(default: 0)**
+
+        ``output_padding`` : additional size added to one side of each spatial dimension of the output shape **(default: 0)**
+
+        ``symbolic_expression`` : basis functions to apply element‑wise to the input (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``groups`` : number of blocked connections from input channels to output channels **(default: 1)**
+
+        ``bias`` : if ``True``, adds a learnable bias to the output **(default: True)**
+
+        ``dilation`` : spacing between kernel elements **(default: 1)**
+
+        ``padding_mode`` : ``'zeros'``, ``'reflect'``, ``'replicate'`` or ``'circular'`` **(default: 'zeros')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(N, C_{in}, D_{in}, H_{in}, W_{in})`
+    - Output: :math:`(N, C_{out}, D_{out}, H_{out}, W_{out})` where
+
+      .. math::
+
+         \begin{aligned}
+         D_{out} = &(D_{in} - 1) \times \text{stride}[0] - 2 \times \text{padding}[0] \\
+                   &+ \text{dilation}[0] \times (\text{kernel_size}[0] - 1) + \text{output_padding}[0] + 1
+         \end{aligned}
+
+      .. math::
+
+         \begin{aligned}
+         H_{out} = &(H_{in} - 1) \times \text{stride}[1] - 2 \times \text{padding}[1] \\
+                   &+ \text{dilation}[1] \times (\text{kernel_size}[1] - 1) + \text{output_padding}[1] + 1
+         \end{aligned}
+
+      .. math::
+
+         \begin{aligned}
+         W_{out} = &(W_{in} - 1) \times \text{stride}[2] - 2 \times \text{padding}[2] \\
+                   &+ \text{dilation}[2] \times (\text{kernel_size}[2] - 1) + \text{output_padding}[2] + 1
+         \end{aligned}
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNConvTranspose3d
+        import torch
+
+        m = TNConvTranspose3d(16, 33, 3, stride=2, symbolic_expression='x**2 + torch.cos(x)')
+        input = torch.randn(20, 16, 10, 50, 100)
+        output = m(input)
+
+
+TNRNN
+-----
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNRNN`` : :classtext:`class` **TNRNN** :classtext:`(input_size, hidden_size, num_layers=1, nonlinearity='tanh', bias=True, batch_first=False, dropout=0.0, bidirectional=False, neuron_expression='x', device=None, dtype=None)`
+
+- Description:
+    Applies a multi-layer Elman RNN with :math:`\tanh` or :math:`\text{ReLU}` non-linearity to an input sequence, where both the input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+
+    For each element in the input sequence, each layer computes:
+
+    .. math::
+
+       h_t = \text{act}\!\left( \sum_{i} W_{ih}^{(i)} f_i(x_t) + \sum_{j} W_{hh}^{(j)} f_j(h_{t-1}) + b \right)
+
+    where :math:`f_i` and :math:`f_j` are the basis functions derived from ``neuron_expression``, applied to the input and the previous hidden state respectively. The layer learns separate weight matrices for each basis function.
+
+    All parameters are identical to those of :class:`torch.nn.RNN`, with the addition of ``neuron_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``input_size`` : the number of expected features in the input :math:`x` **(default: required)**
+
+        ``hidden_size`` : the number of features in the hidden state :math:`h` **(default: required)**
+
+        ``num_layers`` : number of recurrent layers **(default: 1)**
+
+        ``nonlinearity`` : the non-linearity to use. Can be either ``'tanh'`` or ``'relu'``. **(default: 'tanh')**
+
+        ``bias`` : if ``False``, the layer does not use bias weights **(default: True)**
+
+        ``batch_first`` : if ``True``, input and output tensors are provided as ``(batch, seq, feature)`` **(default: False)**
+
+        ``dropout`` : if non-zero, introduces a Dropout layer on the outputs of each RNN layer except the last layer **(default: 0.0)**
+
+        ``bidirectional`` : if ``True``, becomes a bidirectional RNN **(default: False)**
+
+        ``neuron_expression`` : symbolic expression defining the basis functions for both input and hidden transformations (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNRNN
+        import torch
+
+        rnn = TNRNN(10, 20, 2, neuron_expression='x + torch.sin(x)')
+        input = torch.randn(5, 3, 10)
+        h0 = torch.randn(2, 3, 20)
+        output, hn = rnn(input, h0)
+
+
+TNLSTM
+------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNLSTM`` : :classtext:`class` **TNLSTM** :classtext:`(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0.0, bidirectional=False, neuron_expression='x', device=None, dtype=None)`
+
+- Description:
+    Applies a multi-layer long short-term memory (LSTM) RNN to an input sequence, where the input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+
+    For each element in the input sequence, each layer computes the LSTM equations with basis functions replacing the linear transformations.
+
+    All parameters are identical to those of :class:`torch.nn.LSTM`, with the addition of ``neuron_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``input_size`` : the number of expected features in the input :math:`x` **(default: required)**
+
+        ``hidden_size`` : the number of features in the hidden state :math:`h` **(default: required)**
+
+        ``num_layers`` : number of recurrent layers **(default: 1)**
+
+        ``bias`` : if ``False``, the layer does not use bias weights **(default: True)**
+
+        ``batch_first`` : if ``True``, input and output tensors are provided as ``(batch, seq, feature)`` **(default: False)**
+
+        ``dropout`` : if non-zero, introduces a Dropout layer on the outputs of each LSTM layer except the last layer **(default: 0.0)**
+
+        ``bidirectional`` : if ``True``, becomes a bidirectional LSTM **(default: False)**
+
+        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNLSTM
+        import torch
+
+        lstm = TNLSTM(10, 20, 2, neuron_expression='x + 0.5@x**2')
+        input = torch.randn(5, 3, 10)
+        h0 = torch.randn(2, 3, 20)
+        c0 = torch.randn(2, 3, 20)
+        output, (hn, cn) = lstm(input, (h0, c0))
+
+
+TNGRU
+-----
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNGRU`` : :classtext:`class` **TNGRU** :classtext:`(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0.0, bidirectional=False, neuron_expression='x', device=None, dtype=None)`
+
+- Description:
+    Applies a multi-layer gated recurrent unit (GRU) RNN to an input sequence, where the input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+
+    For each element in the input sequence, each layer computes the GRU equations with basis functions replacing the linear transformations.
+
+    All parameters are identical to those of :class:`torch.nn.GRU`, with the addition of ``neuron_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``input_size`` : the number of expected features in the input :math:`x` **(default: required)**
+
+        ``hidden_size`` : the number of features in the hidden state :math:`h` **(default: required)**
+
+        ``num_layers`` : number of recurrent layers **(default: 1)**
+
+        ``bias`` : if ``False``, the layer does not use bias weights **(default: True)**
+
+        ``batch_first`` : if ``True``, input and output tensors are provided as ``(batch, seq, feature)`` **(default: False)**
+
+        ``dropout`` : if non-zero, introduces a Dropout layer on the outputs of each GRU layer except the last layer **(default: 0.0)**
+
+        ``bidirectional`` : if ``True``, becomes a bidirectional GRU **(default: False)**
+
+        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNGRU
+        import torch
+
+        gru = TNGRU(10, 20, 2, neuron_expression='x + torch.sin(x)')
+        input = torch.randn(5, 3, 10)
+        h0 = torch.randn(2, 3, 20)
+        output, hn = gru(input, h0)
+
+
+TNRNNCell
+---------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNRNNCell`` : :classtext:`class` **TNRNNCell** :classtext:`(input_size, hidden_size, bias=True, nonlinearity='tanh', neuron_expression='x', device=None, dtype=None)`
+
+- Description:
+    An Elman RNN cell with :math:`\tanh` or :math:`\text{ReLU}` non-linearity, where both input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+
+    This is the single‑step version of :class:`TNRNN`.
+
+    All parameters are identical to those of :class:`torch.nn.RNNCell`, with the addition of ``neuron_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``input_size`` : the number of expected features in the input :math:`x` **(default: required)**
+
+        ``hidden_size`` : the number of features in the hidden state :math:`h` **(default: required)**
+
+        ``bias`` : if ``False``, the layer does not use bias weights **(default: True)**
+
+        ``nonlinearity`` : the non-linearity to use. Can be either ``'tanh'`` or ``'relu'``. **(default: 'tanh')**
+
+        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(N, H_{in})` or :math:`(H_{in})` where :math:`H_{in} = \text{input_size}`
+    - Hidden: :math:`(N, H_{out})` or :math:`(H_{out})` where :math:`H_{out} = \text{hidden_size}` (defaults to zero if not provided)
+    - Output: :math:`(N, H_{out})` or :math:`(H_{out})` tensor containing the next hidden state
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNRNNCell
+        import torch
+
+        rnn = TNRNNCell(10, 20, neuron_expression='x + torch.sin(x)')
+        input = torch.randn(6, 3, 10)
+        hx = torch.randn(3, 20)
+        output = []
+        for i in range(6):
+            hx = rnn(input[i], hx)
+            output.append(hx)
+
+
+TNLSTMCell
+----------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNLSTMCell`` : :classtext:`class` **TNLSTMCell** :classtext:`(input_size, hidden_size, bias=True, neuron_expression='x', device=None, dtype=None)`
+
+- Description:
+    A long short-term memory (LSTM) cell, where input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+
+    This is the single‑step version of :class:`TNLSTM`.
+
+    All parameters are identical to those of :class:`torch.nn.LSTMCell`, with the addition of ``neuron_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``input_size`` : the number of expected features in the input :math:`x` **(default: required)**
+
+        ``hidden_size`` : the number of features in the hidden state :math:`h` **(default: required)**
+
+        ``bias`` : if ``False``, the layer does not use bias weights **(default: True)**
+
+        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(N, H_{in})` or :math:`(H_{in})` where :math:`H_{in} = \text{input_size}`
+    - Hidden: :math:`(N, H_{out})` or :math:`(H_{out})`, Cell: :math:`(N, H_{out})` or :math:`(H_{out})` where :math:`H_{out} = \text{hidden_size}` (defaults to zero if not provided)
+    - Output: :math:`(h', c')` each of shape :math:`(N, H_{out})` or :math:`(H_{out})`
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNLSTMCell
+        import torch
+
+        rnn = TNLSTMCell(10, 20, neuron_expression='x + 0.1@x**2')
+        input = torch.randn(6, 3, 10)
+        hx = torch.randn(3, 20)
+        cx = torch.randn(3, 20)
+        output = []
+        for i in range(6):
+            hx, cx = rnn(input[i], (hx, cx))
+            output.append(hx)
+
+
+TNGRUCell
+---------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNGRUCell`` : :classtext:`class` **TNGRUCell** :classtext:`(input_size, hidden_size, bias=True, neuron_expression='x', device=None, dtype=None)`
+
+- Description:
+    A gated recurrent unit (GRU) cell, where input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+
+    This is the single‑step version of :class:`TNGRU`.
+
+    All parameters are identical to those of :class:`torch.nn.GRUCell`, with the addition of ``neuron_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``input_size`` : the number of expected features in the input :math:`x` **(default: required)**
+
+        ``hidden_size`` : the number of features in the hidden state :math:`h` **(default: required)**
+
+        ``bias`` : if ``False``, the layer does not use bias weights **(default: True)**
+
+        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(N, H_{in})` or :math:`(H_{in})` where :math:`H_{in} = \text{input_size}`
+    - Hidden: :math:`(N, H_{out})` or :math:`(H_{out})` where :math:`H_{out} = \text{hidden_size}` (defaults to zero if not provided)
+    - Output: :math:`(N, H_{out})` or :math:`(H_{out})` tensor containing the next hidden state
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNGRUCell
+        import torch
+
+        rnn = TNGRUCell(10, 20, neuron_expression='x + torch.cos(x)')
+        input = torch.randn(6, 3, 10)
+        hx = torch.randn(3, 20)
+        output = []
+        for i in range(6):
+            hx = rnn(input[i], hx)
+            output.append(hx)
+
+
+Common Notes
+------------
+
+- **Basis function syntax**: The expression is a Python string that can contain any valid PyTorch operations (e.g., ``torch.sin``, ``torch.cos``, ``torch.exp``, ``**``, ``*``, etc.). The variable representing the input is always ``x``. Coefficients (e.g., ``0.5@x**2``) are ignored because the layer learns its own weights; the ``@`` symbol is only used for parsing but does not affect the computation.
+- **Weight sharing**: Each basis function :math:`f_i` has its own weight matrix/convolution kernel, so the number of parameters scales linearly with the number of basis functions.
+- **Save/load**: All modules support standard PyTorch serialisation via :func:`torch.save` and :func:`torch.load`, including the dynamic function compilation.
+- **Performance**: For multiple basis functions, the computation is performed as a loop over functions. For large models, consider limiting the number of terms or using simpler expressions.
+- **Integration**: These modules are fully compatible with PyTorch's optimizers, data parallelism, and mixed precision training.
+
+.. note::
+   The RNN modules internally augment the input by concatenating the outputs of all basis functions along the feature dimension before passing to a native PyTorch RNN implementation. This provides high performance while still allowing arbitrary symbolic expressions.
+
+.. warning::
+   When using the Cell versions, the basis functions are applied via :class:`TNLinear`, which itself uses the same symbolic expression. The total parameter count may become large if many basis functions are used.
