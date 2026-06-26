@@ -1062,10 +1062,10 @@ TNRNN
 
 .. container:: custom-background
 
-   ``tnlearn.modules.TNRNN`` : :classtext:`class` **TNRNN** :classtext:`(input_size, hidden_size, num_layers=1, nonlinearity='tanh', bias=True, batch_first=False, dropout=0.0, bidirectional=False, neuron_expression='x', device=None, dtype=None)`
+   ``tnlearn.modules.TNRNN`` : :classtext:`class` **TNRNN** :classtext:`(input_size, hidden_size, num_layers=1, nonlinearity='tanh', bias=True, batch_first=False, dropout=0.0, bidirectional=False, symbolic_expression='x', device=None, dtype=None)`
 
 - Description:
-    Applies a multi-layer Elman RNN with :math:`\tanh` or :math:`\text{ReLU}` non-linearity to an input sequence, where both the input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+    Applies a multi-layer Elman RNN with :math:`\tanh` or :math:`\text{ReLU}` non-linearity to an input sequence, where both the input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``symbolic_expression``.
 
     For each element in the input sequence, each layer computes:
 
@@ -1073,9 +1073,9 @@ TNRNN
 
        h_t = \text{act}\!\left( \sum_{i} W_{ih}^{(i)} f_i(x_t) + \sum_{j} W_{hh}^{(j)} f_j(h_{t-1}) + b \right)
 
-    where :math:`f_i` and :math:`f_j` are the basis functions derived from ``neuron_expression``, applied to the input and the previous hidden state respectively. The layer learns separate weight matrices for each basis function.
+    where :math:`f_i` and :math:`f_j` are the basis functions derived from ``symbolic_expression``, applied to the input and the previous hidden state respectively. The layer learns separate weight matrices for each basis function.
 
-    All parameters are identical to those of :class:`torch.nn.RNN`, with the addition of ``neuron_expression``.
+    All parameters are identical to those of :class:`torch.nn.RNN`, with the addition of ``symbolic_expression``.
 
 - **Parameters**
 
@@ -1097,7 +1097,7 @@ TNRNN
 
         ``bidirectional`` : if ``True``, becomes a bidirectional RNN **(default: False)**
 
-        ``neuron_expression`` : symbolic expression defining the basis functions for both input and hidden transformations (same syntax as :class:`TNLinear`) **(default: 'x')**
+        ``symbolic_expression`` : symbolic expression defining the basis functions for both input and hidden transformations (same syntax as :class:`TNLinear`) **(default: 'x')**
 
         ``device`` : the desired device of the parameters **(default: None)**
 
@@ -1110,7 +1110,7 @@ TNRNN
         from tnlearn import TNRNN
         import torch
 
-        rnn = TNRNN(10, 20, 2, neuron_expression='x + torch.sin(x)')
+        rnn = TNRNN(10, 20, 2, symbolic_expression='x + torch.sin(x)')
         input = torch.randn(5, 3, 10)
         h0 = torch.randn(2, 3, 20)
         output, hn = rnn(input, h0)
@@ -1121,14 +1121,14 @@ TNLSTM
 
 .. container:: custom-background
 
-   ``tnlearn.modules.TNLSTM`` : :classtext:`class` **TNLSTM** :classtext:`(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0.0, bidirectional=False, neuron_expression='x', device=None, dtype=None)`
+   ``tnlearn.modules.TNLSTM`` : :classtext:`class` **TNLSTM** :classtext:`(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0.0, bidirectional=False, symbolic_expression='x', device=None, dtype=None)`
 
 - Description:
-    Applies a multi-layer long short-term memory (LSTM) RNN to an input sequence, where the input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+    Applies a multi-layer long short-term memory (LSTM) RNN to an input sequence, where the input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``symbolic_expression``.
 
     For each element in the input sequence, each layer computes the LSTM equations with basis functions replacing the linear transformations.
 
-    All parameters are identical to those of :class:`torch.nn.LSTM`, with the addition of ``neuron_expression``.
+    All parameters are identical to those of :class:`torch.nn.LSTM`, with the addition of ``symbolic_expression``.
 
 - **Parameters**
 
@@ -1148,7 +1148,7 @@ TNLSTM
 
         ``bidirectional`` : if ``True``, becomes a bidirectional LSTM **(default: False)**
 
-        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+        ``symbolic_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
 
         ``device`` : the desired device of the parameters **(default: None)**
 
@@ -1161,7 +1161,7 @@ TNLSTM
         from tnlearn import TNLSTM
         import torch
 
-        lstm = TNLSTM(10, 20, 2, neuron_expression='x + 0.5@x**2')
+        lstm = TNLSTM(10, 20, 2, symbolic_expression='x + 0.5@x**2')
         input = torch.randn(5, 3, 10)
         h0 = torch.randn(2, 3, 20)
         c0 = torch.randn(2, 3, 20)
@@ -1173,14 +1173,14 @@ TNGRU
 
 .. container:: custom-background
 
-   ``tnlearn.modules.TNGRU`` : :classtext:`class` **TNGRU** :classtext:`(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0.0, bidirectional=False, neuron_expression='x', device=None, dtype=None)`
+   ``tnlearn.modules.TNGRU`` : :classtext:`class` **TNGRU** :classtext:`(input_size, hidden_size, num_layers=1, bias=True, batch_first=False, dropout=0.0, bidirectional=False, symbolic_expression='x', device=None, dtype=None)`
 
 - Description:
-    Applies a multi-layer gated recurrent unit (GRU) RNN to an input sequence, where the input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+    Applies a multi-layer gated recurrent unit (GRU) RNN to an input sequence, where the input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``symbolic_expression``.
 
     For each element in the input sequence, each layer computes the GRU equations with basis functions replacing the linear transformations.
 
-    All parameters are identical to those of :class:`torch.nn.GRU`, with the addition of ``neuron_expression``.
+    All parameters are identical to those of :class:`torch.nn.GRU`, with the addition of ``symbolic_expression``.
 
 - **Parameters**
 
@@ -1200,7 +1200,7 @@ TNGRU
 
         ``bidirectional`` : if ``True``, becomes a bidirectional GRU **(default: False)**
 
-        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+        ``symbolic_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
 
         ``device`` : the desired device of the parameters **(default: None)**
 
@@ -1213,7 +1213,7 @@ TNGRU
         from tnlearn import TNGRU
         import torch
 
-        gru = TNGRU(10, 20, 2, neuron_expression='x + torch.sin(x)')
+        gru = TNGRU(10, 20, 2, symbolic_expression='x + torch.sin(x)')
         input = torch.randn(5, 3, 10)
         h0 = torch.randn(2, 3, 20)
         output, hn = gru(input, h0)
@@ -1224,14 +1224,14 @@ TNRNNCell
 
 .. container:: custom-background
 
-   ``tnlearn.modules.TNRNNCell`` : :classtext:`class` **TNRNNCell** :classtext:`(input_size, hidden_size, bias=True, nonlinearity='tanh', neuron_expression='x', device=None, dtype=None)`
+   ``tnlearn.modules.TNRNNCell`` : :classtext:`class` **TNRNNCell** :classtext:`(input_size, hidden_size, bias=True, nonlinearity='tanh', symbolic_expression='x', device=None, dtype=None)`
 
 - Description:
-    An Elman RNN cell with :math:`\tanh` or :math:`\text{ReLU}` non-linearity, where both input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+    An Elman RNN cell with :math:`\tanh` or :math:`\text{ReLU}` non-linearity, where both input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``symbolic_expression``.
 
     This is the single‑step version of :class:`TNRNN`.
 
-    All parameters are identical to those of :class:`torch.nn.RNNCell`, with the addition of ``neuron_expression``.
+    All parameters are identical to those of :class:`torch.nn.RNNCell`, with the addition of ``symbolic_expression``.
 
 - **Parameters**
 
@@ -1245,7 +1245,7 @@ TNRNNCell
 
         ``nonlinearity`` : the non-linearity to use. Can be either ``'tanh'`` or ``'relu'``. **(default: 'tanh')**
 
-        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+        ``symbolic_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
 
         ``device`` : the desired device of the parameters **(default: None)**
 
@@ -1264,7 +1264,7 @@ TNRNNCell
         from tnlearn import TNRNNCell
         import torch
 
-        rnn = TNRNNCell(10, 20, neuron_expression='x + torch.sin(x)')
+        rnn = TNRNNCell(10, 20, symbolic_expression='x + torch.sin(x)')
         input = torch.randn(6, 3, 10)
         hx = torch.randn(3, 20)
         output = []
@@ -1278,14 +1278,14 @@ TNLSTMCell
 
 .. container:: custom-background
 
-   ``tnlearn.modules.TNLSTMCell`` : :classtext:`class` **TNLSTMCell** :classtext:`(input_size, hidden_size, bias=True, neuron_expression='x', device=None, dtype=None)`
+   ``tnlearn.modules.TNLSTMCell`` : :classtext:`class` **TNLSTMCell** :classtext:`(input_size, hidden_size, bias=True, symbolic_expression='x', device=None, dtype=None)`
 
 - Description:
-    A long short-term memory (LSTM) cell, where input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+    A long short-term memory (LSTM) cell, where input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``symbolic_expression``.
 
     This is the single‑step version of :class:`TNLSTM`.
 
-    All parameters are identical to those of :class:`torch.nn.LSTMCell`, with the addition of ``neuron_expression``.
+    All parameters are identical to those of :class:`torch.nn.LSTMCell`, with the addition of ``symbolic_expression``.
 
 - **Parameters**
 
@@ -1297,7 +1297,7 @@ TNLSTMCell
 
         ``bias`` : if ``False``, the layer does not use bias weights **(default: True)**
 
-        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+        ``symbolic_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
 
         ``device`` : the desired device of the parameters **(default: None)**
 
@@ -1316,7 +1316,7 @@ TNLSTMCell
         from tnlearn import TNLSTMCell
         import torch
 
-        rnn = TNLSTMCell(10, 20, neuron_expression='x + 0.1@x**2')
+        rnn = TNLSTMCell(10, 20, symbolic_expression='x + 0.1@x**2')
         input = torch.randn(6, 3, 10)
         hx = torch.randn(3, 20)
         cx = torch.randn(3, 20)
@@ -1331,14 +1331,14 @@ TNGRUCell
 
 .. container:: custom-background
 
-   ``tnlearn.modules.TNGRUCell`` : :classtext:`class` **TNGRUCell** :classtext:`(input_size, hidden_size, bias=True, neuron_expression='x', device=None, dtype=None)`
+   ``tnlearn.modules.TNGRUCell`` : :classtext:`class` **TNGRUCell** :classtext:`(input_size, hidden_size, bias=True, symbolic_expression='x', device=None, dtype=None)`
 
 - Description:
-    A gated recurrent unit (GRU) cell, where input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``neuron_expression``.
+    A gated recurrent unit (GRU) cell, where input‑to‑hidden and hidden‑to‑hidden transformations are augmented with basis functions defined by ``symbolic_expression``.
 
     This is the single‑step version of :class:`TNGRU`.
 
-    All parameters are identical to those of :class:`torch.nn.GRUCell`, with the addition of ``neuron_expression``.
+    All parameters are identical to those of :class:`torch.nn.GRUCell`, with the addition of ``symbolic_expression``.
 
 - **Parameters**
 
@@ -1350,7 +1350,7 @@ TNGRUCell
 
         ``bias`` : if ``False``, the layer does not use bias weights **(default: True)**
 
-        ``neuron_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
+        ``symbolic_expression`` : symbolic expression defining the basis functions (same syntax as :class:`TNLinear`) **(default: 'x')**
 
         ``device`` : the desired device of the parameters **(default: None)**
 
@@ -1369,7 +1369,7 @@ TNGRUCell
         from tnlearn import TNGRUCell
         import torch
 
-        rnn = TNGRUCell(10, 20, neuron_expression='x + torch.cos(x)')
+        rnn = TNGRUCell(10, 20, symbolic_expression='x + torch.cos(x)')
         input = torch.randn(6, 3, 10)
         hx = torch.randn(3, 20)
         output = []
@@ -1378,17 +1378,296 @@ TNGRUCell
             output.append(hx)
 
 
+
+TNTransformer
+-------------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNTransformer`` : :classtext:`class` **TNTransformer** :classtext:`(d_model=512, nhead=8, num_encoder_layers=6, num_decoder_layers=6, dim_feedforward=2048, dropout=0.1, activation='relu', custom_encoder=None, custom_decoder=None, layer_norm_eps=1e-5, batch_first=False, norm_first=False, bias=True, symbolic_expression='x', device=None, dtype=None)`
+
+- Description:
+    A basic Transformer model where the feed‑forward networks and linear projections in encoder/decoder layers are replaced with :class:`TNLinear`, allowing user‑defined basis functions (e.g., ``'x + torch.sin(x)'``) inside the transformer blocks.
+
+    This module implements the original Transformer architecture described in the *Attention Is All You Need* paper. The intent of this layer is as a reference implementation for foundational understanding and thus it contains only limited features relative to newer Transformer architectures. All parameters are identical to those of :class:`torch.nn.Transformer`, with the addition of ``symbolic_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``d_model`` : the number of expected features in the encoder/decoder inputs **(default: 512)**
+
+        ``nhead`` : the number of heads in the multiheadattention models **(default: 8)**
+
+        ``num_encoder_layers`` : the number of sub‑encoder‑layers in the encoder **(default: 6)**
+
+        ``num_decoder_layers`` : the number of sub‑decoder‑layers in the decoder **(default: 6)**
+
+        ``dim_feedforward`` : the dimension of the feedforward network model **(default: 2048)**
+
+        ``dropout`` : the dropout value **(default: 0.1)**
+
+        ``activation`` : the activation function of encoder/decoder intermediate layer, can be a string (``'relu'`` or ``'gelu'``) or a unary callable **(default: 'relu')**
+
+        ``custom_encoder`` : custom encoder **(default: None)**
+
+        ``custom_decoder`` : custom decoder **(default: None)**
+
+        ``layer_norm_eps`` : the eps value in layer normalization components **(default: 1e-5)**
+
+        ``batch_first`` : if ``True``, input and output tensors are provided as ``(batch, seq, feature)`` **(default: False)**
+
+        ``norm_first`` : if ``True``, layer norm is done prior to attention and feedforward operations **(default: False)**
+
+        ``bias`` : if set to ``False``, ``Linear`` and ``LayerNorm`` layers will not learn an additive bias **(default: True)**
+
+        ``symbolic_expression`` : symbolic expression defining the basis functions for all :class:`TNLinear` layers inside the transformer (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNTransformer
+        import torch
+
+        transformer = TNTransformer(
+            d_model=512, nhead=8,
+            num_encoder_layers=2, num_decoder_layers=2,
+            symbolic_expression='x + torch.tanh(x)'
+        )
+        src = torch.randn(10, 32, 512)   # (seq, batch, feature)
+        tgt = torch.randn(20, 32, 512)
+        out = transformer(src, tgt)
+
+    .. note::
+        This class uses :class:`TNTransformerEncoder` and :class:`TNTransformerDecoder` internally. When `batch_first=False` (default), the input and output shapes are `(seq, batch, feature)`. When `batch_first=True`, shapes are `(batch, seq, feature)`.
+
+
+TNTransformerEncoder
+--------------------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNTransformerEncoder`` : :classtext:`class` **TNTransformerEncoder** :classtext:`(encoder_layer, num_layers, norm=None, enable_nested_tensor=True, mask_check=True)`
+
+- Description:
+    A stack of N encoder layers, where each layer uses :class:`TNTransformerEncoderLayer`. This module is the TNLearn counterpart of :class:`torch.nn.TransformerEncoder`.
+
+    TransformerEncoder is a stack of N encoder layers. The intent of this layer is as a reference implementation for foundational understanding.
+
+    .. warning::
+        All layers in the TransformerEncoder are initialized with the same parameters. It is recommended to manually initialize the layers after creating the TransformerEncoder instance.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``encoder_layer`` : an instance of the :class:`TNTransformerEncoderLayer` class **(required)**
+
+        ``num_layers`` : the number of sub‑encoder‑layers in the encoder **(required)**
+
+        ``norm`` : the layer normalization component **(optional)**
+
+        ``enable_nested_tensor`` : if ``True``, input will automatically convert to nested tensor (and convert back on output). This will improve the overall performance when padding rate is high **(default: True)**
+
+        ``mask_check`` : whether to check the mask for left‑aligned padding **(default: True)**
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNTransformerEncoderLayer, TNTransformerEncoder
+        import torch
+
+        encoder_layer = TNTransformerEncoderLayer(
+            d_model=512, nhead=8,
+            symbolic_expression='x + 0.5 * torch.sin(x)'
+        )
+        transformer_encoder = TNTransformerEncoder(encoder_layer, num_layers=2)
+        src = torch.randn(10, 32, 512)
+        out = transformer_encoder(src)
+
+
+TNTransformerDecoder
+--------------------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNTransformerDecoder`` : :classtext:`class` **TNTransformerDecoder** :classtext:`(decoder_layer, num_layers, norm=None)`
+
+- Description:
+    A stack of N decoder layers, where each layer uses :class:`TNTransformerDecoderLayer`. This module is the TNLearn counterpart of :class:`torch.nn.TransformerDecoder`.
+
+    TransformerDecoder is a stack of N decoder layers. The intent of this layer is as a reference implementation for foundational understanding.
+
+    .. warning::
+        All layers in the TransformerDecoder are initialized with the same parameters. It is recommended to manually initialize the layers after creating the TransformerDecoder instance.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``decoder_layer`` : an instance of the :class:`TNTransformerDecoderLayer` class **(required)**
+
+        ``num_layers`` : the number of sub‑decoder‑layers in the decoder **(required)**
+
+        ``norm`` : the layer normalization component **(optional)**
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNTransformerDecoderLayer, TNTransformerDecoder
+        import torch
+
+        decoder_layer = TNTransformerDecoderLayer(
+            d_model=512, nhead=8,
+            symbolic_expression='x * torch.sigmoid(x)'
+        )
+        transformer_decoder = TNTransformerDecoder(decoder_layer, num_layers=2)
+        tgt = torch.randn(20, 32, 512)
+        memory = torch.randn(10, 32, 512)
+        out = transformer_decoder(tgt, memory)
+
+
+TNTransformerEncoderLayer
+-------------------------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNTransformerEncoderLayer`` : :classtext:`class` **TNTransformerEncoderLayer** :classtext:`(d_model, nhead, dim_feedforward=2048, dropout=0.1, activation='relu', layer_norm_eps=1e-5, batch_first=False, norm_first=False, bias=True, symbolic_expression='x', device=None, dtype=None)`
+
+- Description:
+    TransformerEncoderLayer is made up of self‑attention and a feed‑forward network (FFN). The FFN uses :class:`TNLinear` to support custom basis functions defined by ``symbolic_expression``, while the self‑attention projections (query/key/value and output) remain as standard ``nn.Linear`` layers.
+
+    This layer implements the original Transformer encoder block described in the *Attention Is All You Need* paper. All parameters are identical to those of :class:`torch.nn.TransformerEncoderLayer`, with the addition of ``symbolic_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``d_model`` : the number of expected features in the input **(required)**
+
+        ``nhead`` : the number of heads in the multiheadattention models **(required)**
+
+        ``dim_feedforward`` : the dimension of the feedforward network model **(default: 2048)**
+
+        ``dropout`` : the dropout value **(default: 0.1)**
+
+        ``activation`` : the activation function of the intermediate layer, can be a string (``'relu'`` or ``'gelu'``) or a unary callable **(default: 'relu')**
+
+        ``layer_norm_eps`` : the eps value in layer normalization components **(default: 1e-5)**
+
+        ``batch_first`` : if ``True``, input and output tensors are provided as ``(batch, seq, feature)`` **(default: False)**
+
+        ``norm_first`` : if ``True``, layer norm is done prior to self attention and feedforward operations **(default: False)**
+
+        ``bias`` : if set to ``False``, ``Linear`` and ``LayerNorm`` layers will not learn an additive bias **(default: True)**
+
+        ``symbolic_expression`` : symbolic expression defining the basis functions for the :class:`TNLinear` layers in the FFN (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: :math:`(S, N, E)` or :math:`(N, S, E)` if ``batch_first=True``, where :math:`S` is the source sequence length, :math:`N` is the batch size, and :math:`E` is the feature dimension.
+    - Output: same shape as input.
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNTransformerEncoderLayer
+        import torch
+
+        encoder_layer = TNTransformerEncoderLayer(
+            d_model=512, nhead=8,
+            symbolic_expression='x + torch.sin(x)'
+        )
+        src = torch.randn(10, 32, 512)   # (seq, batch, feature)
+        out = encoder_layer(src)
+
+
+TNTransformerDecoderLayer
+-------------------------
+
+.. container:: custom-background
+
+   ``tnlearn.modules.TNTransformerDecoderLayer`` : :classtext:`class` **TNTransformerDecoderLayer** :classtext:`(d_model, nhead, dim_feedforward=2048, dropout=0.1, activation='relu', layer_norm_eps=1e-5, batch_first=False, norm_first=False, bias=True, symbolic_expression='x', device=None, dtype=None)`
+
+- Description:
+    TransformerDecoderLayer is made up of self‑attention, cross‑attention, and a feed‑forward network (FFN). The FFN uses :class:`TNLinear` to support custom basis functions defined by ``symbolic_expression``, while the attention projections (query/key/value and output) remain as standard ``nn.Linear`` layers.
+
+    This layer implements the original Transformer decoder block described in the *Attention Is All You Need* paper. All parameters are identical to those of :class:`torch.nn.TransformerDecoderLayer`, with the addition of ``symbolic_expression``.
+
+- **Parameters**
+
+    .. container:: custom-background-2
+
+        ``d_model`` : the number of expected features in the input **(required)**
+
+        ``nhead`` : the number of heads in the multiheadattention models **(required)**
+
+        ``dim_feedforward`` : the dimension of the feedforward network model **(default: 2048)**
+
+        ``dropout`` : the dropout value **(default: 0.1)**
+
+        ``activation`` : the activation function of the intermediate layer, can be a string (``'relu'`` or ``'gelu'``) or a unary callable **(default: 'relu')**
+
+        ``layer_norm_eps`` : the eps value in layer normalization components **(default: 1e-5)**
+
+        ``batch_first`` : if ``True``, input and output tensors are provided as ``(batch, seq, feature)`` **(default: False)**
+
+        ``norm_first`` : if ``True``, layer norm is done prior to self attention, cross attention and feedforward operations **(default: False)**
+
+        ``bias`` : if set to ``False``, ``Linear`` and ``LayerNorm`` layers will not learn an additive bias **(default: True)**
+
+        ``symbolic_expression`` : symbolic expression defining the basis functions for the :class:`TNLinear` layers in the FFN (same syntax as :class:`TNLinear`) **(default: 'x')**
+
+        ``device`` : the desired device of the parameters **(default: None)**
+
+        ``dtype`` : the desired dtype of the parameters **(default: None)**
+
+- **Shape**
+
+    - Input: target :math:`(T, N, E)`, memory :math:`(S, N, E)` (or with batch first if enabled).
+    - Output: same shape as target.
+
+- **Example**
+
+    .. code-block:: python
+
+        from tnlearn import TNTransformerDecoderLayer
+        import torch
+
+        decoder_layer = TNTransformerDecoderLayer(
+            d_model=512, nhead=8,
+            symbolic_expression='x**2 + torch.cos(x)'
+        )
+        tgt = torch.randn(20, 32, 512)   # (tgt_seq, batch, feature)
+        memory = torch.randn(10, 32, 512)
+        out = decoder_layer(tgt, memory)
+
 Common Notes
 ------------
 
-- **Basis function syntax**: The expression is a Python string that can contain any valid PyTorch operations (e.g., ``torch.sin``, ``torch.cos``, ``torch.exp``, ``**``, ``*``, etc.). The variable representing the input is always ``x``. Coefficients (e.g., ``0.5@x**2``) are ignored because the layer learns its own weights; the ``@`` symbol is only used for parsing but does not affect the computation.
-- **Weight sharing**: Each basis function :math:`f_i` has its own weight matrix/convolution kernel, so the number of parameters scales linearly with the number of basis functions.
+- **Basis function syntax**: The expression is a Python string that can contain any valid PyTorch operations (e.g., ``torch.sin``, ``torch.cos``, ``torch.exp``, ``**``, ``*``, etc.). The variable representing the input is always ``x``. Coefficients (e.g., ``0.5@x**2``) are ignored because the layer learns its own weights; the ``@`` symbol is only used for parsing.
+
+- **Weight sharing**: Each basis function :math:`f_i` has its own weight matrix/convolution kernel (or linear projection). Consequently, the number of trainable parameters scales linearly with the number of basis functions. This applies to all modules in ``tnlearn.modules``, including linear, convolutional, recurrent, and transformer layers.
+
+- **Transformer-specific**: In transformer encoder/decoder layers, only the feed‑forward network (FFN) uses :class:`TNLinear`; the attention projections (query/key/value and output) remain standard `nn.Linear` layers for efficiency and stability.
+
 - **Save/load**: All modules support standard PyTorch serialisation via :func:`torch.save` and :func:`torch.load`, including the dynamic function compilation.
-- **Performance**: For multiple basis functions, the computation is performed as a loop over functions. For large models, consider limiting the number of terms or using simpler expressions.
+
+- **Performance**: The forward pass evaluates each basis function in a loop. For large models or many basis functions, consider using simpler expressions to reduce computational and memory overhead.
+
 - **Integration**: These modules are fully compatible with PyTorch's optimizers, data parallelism, and mixed precision training.
 
 .. note::
    The RNN modules internally augment the input by concatenating the outputs of all basis functions along the feature dimension before passing to a native PyTorch RNN implementation. This provides high performance while still allowing arbitrary symbolic expressions.
-
-.. warning::
-   When using the Cell versions, the basis functions are applied via :class:`TNLinear`, which itself uses the same symbolic expression. The total parameter count may become large if many basis functions are used.
