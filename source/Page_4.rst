@@ -338,9 +338,10 @@ tnlearn.LLMSymRegressor
 
     .. container:: custom-background
 
-       ``tnlearn.LLMSymRegressor`` : :classtext:`class` **tnlearn.LLMSymRegressor** :classtext:`(llm_config=None, max_iterations=20, samples_per_iteration=8, background=None, random_state=None, verbose=True, extra_prompt=None)`
+       ``tnlearn.LLMSymRegressor`` : :classtext:`class` **tnlearn.LLMSymRegressor** :classtext:`(llm_config=None, max_iterations=20, samples_per_iteration=8, background=None, verbose=True, max_params=10, n_restarts=5, bfgs_maxiter=200, extra_prompt=None, exp_dir=None, save=False, random_state=None)`
 
 - **How to initialize your** ``LLMSymRegressor`` **:**
+
     ``llm_config``: Dictionary configuring the LLM provider **(default: None)**
 
         .. container:: custom-background-2
@@ -355,11 +356,21 @@ tnlearn.LLMSymRegressor
 
     ``background``: Optional physical background description to guide the LLM **(default: None)**
 
-    ``random_state``: Seed for random number generators for reproducibility **(default: None)**
-
     ``verbose``: Verbosity level. If int: 0=quiet, 1=basic progress, 2=detailed debug; if bool: True -> 1, False -> 0 **(default: True)**
 
-    ``extra_prompt``: Additional user-provided text appended to the prompt after the equation template **(default: None)**
+    ``max_params``: Maximum number of coefficients (``params``) allowed in the equation **(default: 10)**
+
+    ``n_restarts``: Number of multi‑start BFGS runs used during evaluation **(default: 5)**
+
+    ``bfgs_maxiter``: Maximum BFGS iterations per optimization run **(default: 200)**
+
+    ``extra_prompt``: Additional user-provided text appended to the LLM prompt after the equation template **(default: None)**
+
+    ``exp_dir``: Directory for saving experiment logs and the best equation (if ``save=True``). If not given and ``save=False``, no folder is created **(default: None)**
+
+    ``save``: If ``True``, save experiment logs and the best equation to ``exp_dir``; if ``False``, keep everything in memory **(default: False)**
+
+    ``random_state``: Seed for random number generators for reproducibility **(default: None)**
 
 - **Supported LLM Providers**
 
@@ -395,7 +406,7 @@ tnlearn.LLMSymRegressor
     - ``best_equation_``: the best discovered equation body (a string starting with ``return ...``).
     - ``best_score_``: the highest negative MSE (the evaluation score, higher = better).
     - ``best_params_``: a numpy array of optimized coefficients for ``params[0]``, ``params[1]``, ….
-    - ``neuron``: a string with numeric coefficients, ready to be used as the ``neurons`` argument in ``MLPRegressor``.
+    - The method ``get_neuron_formula()`` returns a string with numeric coefficients, ready to be used as the ``neurons`` argument in ``MLPRegressor``.
 
 - **Here is an example of using** ``LLMSymRegressor`` **quickly:**
 
@@ -414,62 +425,70 @@ tnlearn.LLMSymRegressor
         neuron = LLMSymRegressor(llm_config=llm_config, max_iterations=5)
         neuron.fit(X_train, y_train)
 
-        clf = MLPRegressor(neurons=neuron.neuron, layers_list=[50,30,10])
+        clf = MLPRegressor(neurons=reg.get_neuron_formula(), layers_list=[50,30,10])
         clf.fit(X_train, y_train)
         clf.predict(X_test)
 
     .. note::
-        The ``fit`` method automatically performs BFGS parameter optimization. The resulting ``neuron`` attribute contains a numeric expression (e.g. ``3.0@x**2 + 2.0@x + 0.1``) that can be passed directly to the ``neurons`` parameter of ``MLPRegressor``.
-
+        The ``fit`` method automatically performs BFGS parameter optimization. The resulting formula from ``get_neuron_formula()`` contains a numeric expression (e.g. ``3.0@x**2 + 2.0@x + 0.1``) that can be passed directly to the ``neurons`` parameter of ``MLPRegressor``.
 
 tnlearn.RLRegressor
 -------------------
 
 - Description:
-    ``tnlearn.RLRegressor`` implements a reinforcement learning (policy gradient) agent that selects a subset of basis functions (polynomials and optionally trigonometric terms) to form a symbolic expression. The agent explores the space of basis function combinations and uses Ridge regression to fit coefficients on the training set. The reward is the validation R² score. The discovered expression can be directly used as a neuron formula in ``MLPRegressor``.
+    ``tnlearn.RLRegressor`` implements a reinforcement learning (policy gradient) agent that discovers a **vectorized (homogeneous) symbolic expression** of the form:
+
+    .. math::
+
+        f(\mathbf{x}) = b + \sum_{k} c_k \sum_{j=1}^{d} \phi_k(x_j)
+
+    where :math:`\mathbf{x} \in \mathbb{R}^d` is a multi‑feature input vector, :math:`b` is an intercept, :math:`\phi_k` are basis functions selected from a user‑defined set, and :math:`c_k` are coefficients fitted via Ridge regression. The agent learns to select a subset of basis functions (up to ``max_terms``) to maximise the validation R². The discovered expression can be directly used as a neuron formula in ``MLPRegressor``.
 
     .. container:: custom-background
 
-       ``tnlearn.RLRegressor`` : :classtext:`class` **tnlearn.RLRegressor** :classtext:`(max_power=3, max_terms=5, max_freq=2, use_trigonometric=True, alpha=0.1, force_constant=True, random_state=42, max_episodes=100, val_split=0.2, lr_rl=1e-3, gamma=0.99, hidden_dim=64, verbose=True)`
+       ``tnlearn.RLRegressor`` : :classtext:`class` **tnlearn.RLRegressor** :classtext:`(basis_mode='trigonometric', max_terms=3, max_power=5, alpha=0.1, random_state=42, max_episodes=100, val_split=0.2, lr_rl=1e-3, gamma=0.99, hidden_dim=64, verbose=True)`
 
 - **How to initialize your** ``RLRegressor`` **:**
-    ``max_power``: Maximum exponent for polynomial terms (x**p) **(default: 3)**
 
-    ``max_terms``: Maximum number of basis functions selected per expression **(default: 5)**
+    ``basis_mode`` : determines the set of available basis functions **(default: 'trigonometric')**
 
-    ``max_freq``: Maximum integer frequency for trigonometric functions (k in sin(k*x)) **(default: 2)**
+        .. container:: custom-background-2
 
-    ``use_trigonometric``: Whether to include sin(k*x), cos(k*x) and their products as candidates **(default: True)**
+            - ``'polynomial'`` : only polynomials (constant, :math:`x`, :math:`x^2`, …, :math:`x^{\text{max_power}}`)
+            - ``'trigonometric'`` : polynomials plus :math:`\sin(x)` and :math:`\cos(x)`
+            - ``'all'`` : polynomials plus :math:`\sin(x)`, :math:`\cos(x)`, :math:`\exp(x)`, and :math:`\log(|x|)` (with a small safety offset)
 
-    ``alpha``: Regularisation strength for Ridge regression **(default: 0.1)**
+    ``max_terms`` : maximum number of basis functions allowed in the expression **(default: 3)**
 
-    ``force_constant``: If True, the constant term (1) is always included **(default: True)**
+    ``max_power`` : maximum exponent for polynomial terms (i.e., :math:`x^2` to :math:`x^{\text{max_power}}`). The linear term :math:`x` and the constant are always available **(default: 5)**
 
-    ``random_state``: Random seed for reproducibility **(default: 42)**
+    ``alpha`` : regularisation strength for Ridge regression **(default: 0.1)**
 
-    ``max_episodes``: Number of training episodes **(default: 100)**
+    ``random_state`` : random seed for reproducibility **(default: 42)**
 
-    ``val_split``: Fraction of training data used as validation for reward computation **(default: 0.2)**
+    ``max_episodes`` : number of training episodes **(default: 100)**
 
-    ``lr_rl``: Learning rate for the policy network **(default: 1e-3)**
+    ``val_split`` : fraction of training data used as validation for reward computation **(default: 0.2)**
 
-    ``gamma``: Discount factor for reward calculation **(default: 0.99)**
+    ``lr_rl`` : learning rate for the policy network **(default: 1e-3)**
 
-    ``hidden_dim``: Number of neurons in the policy network's hidden layers **(default: 64)**
+    ``gamma`` : discount factor for reward calculation **(default: 0.99)**
 
-    ``verbose``: If True, print progress updates during training **(default: True)**
+    ``hidden_dim`` : number of neurons in the policy network's hidden layers **(default: 64)**
 
-- **Supported basis functions**
+    ``verbose`` : if ``True``, print progress updates during training **(default: True)**
 
-    - **Polynomial terms**: ``x**p`` (p = 1..max_power)
-    - **Trigonometric terms** (if enabled): ``torch.sin(k*x)``, ``torch.cos(k*x)``, and their products with powers of x and with each other.
-    - **Constant term** (always forced if ``force_constant=True``)
+- **Supported basis functions** (depending on ``basis_mode``)
+
+    - **Polynomial terms** (always available): constant (implicit via intercept), :math:`x`, :math:`x^2`, …, :math:`x^{\text{max_power}}`
+    - **Trigonometric terms** (if ``basis_mode`` is ``'trigonometric'`` or ``'all'``): :math:`\sin(x)`, :math:`\cos(x)`
+    - **Exponential/Logarithmic** (only in ``'all'`` mode): :math:`\exp(x)`, :math:`\log(|x| + 1e-8)`
 
 - **Attributes after fitting**
 
-    - ``best_expr``: the best discovered symbolic expression (with numeric coefficients).
-    - ``best_score``: the best validation R² score achieved.
-    - ``neuron``: alias for ``best_expr``, compatible with the ``neurons`` parameter of ``MLPRegressor``.
+    - ``best_expr`` : the best discovered symbolic expression (with numeric coefficients and intercept), e.g., ``"0.01 + 2.01@(x**2) + 2.99@x + 0.48@(sin(x))"``.
+    - ``best_score`` : the best validation R² score achieved.
+    - ``neuron`` : alias for ``best_expr``, compatible with the ``neurons`` parameter of ``MLPRegressor``.
 
 - **Here is an example of using** ``RLRegressor`` **quickly:**
 
@@ -480,12 +499,15 @@ tnlearn.RLRegressor
         import numpy as np
         from sklearn.model_selection import train_test_split
 
-        X = np.random.uniform(-3, 3, (300, 1))
-        y = 2.5 * X[:,0]**2 + 1.2 * np.sin(2 * X[:,0]) + 0.05 * np.random.randn(300)
+        # Generate multi‑feature data with a homogeneous pattern
+        np.random.seed(42)
+        X = np.random.uniform(-2, 2, (500, 3))
+        y = 2.0 * np.sum(X**2, axis=1) + 3.0 * np.sum(X, axis=1) + 0.5 * np.sum(np.sin(X), axis=1)
+        y += 0.1 * np.random.randn(500)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
-        rl = RLRegressor(max_episodes=200, max_terms=4, use_trigonometric=True, verbose=True)
+        rl = RLRegressor(basis_mode='trigonometric', max_terms=4, max_episodes=150, verbose=True)
         rl.fit(X_train, y_train)
 
         expr = rl.get_neuron()
@@ -493,12 +515,14 @@ tnlearn.RLRegressor
         mlp.fit(X_train, y_train)
         mlp.predict(X_test)
 
-    .. warning::
-        The current implementation of ``RLRegressor`` only supports **univariate** regression (one input feature). Multivariate inputs will raise an error.
+    .. note::
+        The discovered expression is **homogeneous** – the same basis functions are applied to **each feature** independently, and the results are summed. This makes it a natural fit for vectorized symbolic regression and compatible with the ``@`` syntax used by ``VecSymRegressor``.
 
     .. note::
-        The discovered expression uses ``@`` to separate coefficient and function, which is directly compatible with the ``neurons`` parameter of ``MLPRegressor``.  
-        Trigonometric functions are expressed as ``torch.sin(...)`` and ``torch.cos(...)``, ensuring seamless integration with PyTorch.
+        Unlike the older RL regressor, this implementation supports **multiple input features** and does not require pre‑selection of trigonometric frequencies. The policy network learns to select the most relevant basis functions from the predefined set.
+
+    .. warning::
+        When ``basis_mode='all'``, terms like ``exp(x)`` and ``log(x)`` may cause numerical instability for large inputs. Ensure your data is appropriately scaled.
 
 tnlearn.modules – Task‑based Neural Modules
 ============================================
