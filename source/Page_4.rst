@@ -515,12 +515,6 @@ tnlearn.RLRegressor
         mlp.fit(X_train, y_train)
         mlp.predict(X_test)
 
-    .. note::
-        The discovered expression is **homogeneous** – the same basis functions are applied to **each feature** independently, and the results are summed. This makes it a natural fit for vectorized symbolic regression and compatible with the ``@`` syntax used by ``VecSymRegressor``.
-
-    .. note::
-        Unlike the older RL regressor, this implementation supports **multiple input features** and does not require pre‑selection of trigonometric frequencies. The policy network learns to select the most relevant basis functions from the predefined set.
-
     .. warning::
         When ``basis_mode='all'``, terms like ``exp(x)`` and ``log(x)`` may cause numerical instability for large inputs. Ensure your data is appropriately scaled.
 
