@@ -18,11 +18,12 @@ What Are Task-based Neurons?
 ----------------------------
 
 1. Vectorized Symbolic Regression
-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
 Unlike traditional regression algorithms that fit numerical coefficients, symbolic regression first encodes a formula into a tree structure and then uses a genetic algorithm to explore the space of possible mathematical expressions to identify the best formula. Because no gradients with respect to the mathematical formula can be computed, the most common technique for solving symbolic regression problems is genetic programming (GP) [14]_. GP is a powerful population-based evolutionary algorithm, which mainly uses crossover and mutation to generate new formulas. The following two figures illustrate the schematic diagrams of crossover and mutation respectively.
 
 .. figure:: ./_static/Figure_crossover.png
+    :alt: Two expression trees exchange subtrees during genetic crossover.
     :scale: 30%
     :align: center
 
@@ -30,6 +31,7 @@ Unlike traditional regression algorithms that fit numerical coefficients, symbol
 **Crossover** is a genetic programming operation to generate new individuals by means of subtree crossover among the selected individuals, and then explore the symbolic expression space. The specific method is to randomly select subtrees of the winner candidates and exchange them. This operation promotes diversity in the population and can lead to the discovery of new and more effective mathematical formulas.
 
 .. figure:: ./_static/Figure_mutation.png
+    :alt: A mutation replaces a subtree in a candidate expression.
     :scale: 30%
     :align: center
 
@@ -48,6 +50,7 @@ We find that the traditional symbolic regression cannot fulfill these needs, par
 To address these problems, we propose a solution called vectorized symbolic regression. This approach regularizes every variable to learn the same formula, allowing us to organize all variables into a vector. The formulas are then based on vector computation, as illustrated in the following Figure. Unlike traditional symbolic regression, which tends to identify a heterogeneous formula. The vectorized symbolic regression is simple yet mighty, which has valuable characteristics suitable to this task:
 
 .. figure:: ./_static/Figure_vectorized.png
+    :alt: Vectorized symbolic regression applies a shared transformation to each feature.
     :scale: 40%
     :align: center
 
@@ -89,19 +92,19 @@ Please read the next page :doc:`Get Started <Page_3>` to install ``tnlearn`` qui
 Reference
 ----------
 
-.. [1] Ronneberger, Olaf and Fischer, Philipp and Brox, Thomas, "`U-net: Convolutional networks for biomedical image segmentation <https://link.springer.com/chapter/10.1007/978-3-319-24574-4_28>`_", in *MICCAI*, pp. 234-241, Springer, 2015.
-.. [2] He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian, "`Deep residual learning for image recognition <https://openaccess.thecvf.com/content_cvpr_2016/html/He_Deep_Residual_Learning_CVPR_2016_paper.html>`_", in *CVPR*, pp. 770-778, Springer, 2016.
-.. [3] Fan, Fenglei and Wang, Dayang and Guo, Hengtao and Zhu, Qikui and Yan, Pingkun and Wang, Ge and Yu, Hengyong, "`On a sparse shortcut topology of artificial neural networks <https://ieeexplore.ieee.org/abstract/document/9614997>`_", in *IEEE Transactions on Artificial Intelligence*, IEEE, 2021.
-.. [4] Yang, Chengrun and Bender, Gabriel and Liu, Hanxiao and Kindermans, Pieter-Jan and Udell, Madeleine and Lu, Yifeng and Le, Quoc V and Huang, Da, "`TabNAS: Rejection Sampling for Neural Architecture Search on Tabular Datasets <https://proceedings.neurips.cc/paper_files/paper/2022/hash/4e392aa9bc70ed731d3c9c32810f92fb-Abstract-Conference.html>`_", in *Advances in Neural Information Processing Systems*, pp. 11906-11917, 2022.
-.. [5] Zador, Anthony and Richards, Blake and Olveczky, Bence and Escola, Sean and Bengio, Yoshua and Boahen, Kwabena and Botvinick, Matthew and Chklovskii, Dmitri and Churchland, Anne and Clopath, Claudia and others, "`Toward next-generation artificial intelligence: Catalyzing the neuroai revolution <https://arxiv.org/abs/2210.08340>`_", in *arXiv preprint arXiv:2210.08340*, 2022.
-.. [6] Chrysos, Grigoris and Moschoglou, Stylianos and Bouritsas, Giorgos and Deng, Jiankang and Panagakis, Yannis and Zafeiriou, Stefanos P, "`Deep Polynomial Neural Networks <https://ieeexplore.ieee.org/abstract/document/9353253>`_", in *IEEE Transactions on Pattern Analysis and Machine Intelligence*, 2021.
-.. [7] Fan, Feng-Lei and Li, Yingxin and Peng, Hanchuan and Zeng, Tieyong and Wang, Fei, "`Towards NeuroAI: Introducing Neuronal Diversity into Artificial Neural Networks <https://arxiv.org/abs/2301.09245>`_", in *arXiv preprint arXiv:2301.09245*, 2023.
-.. [8] Jiang, Yiyang and Yang, Fan and Zhu, Hengliang and Zhou, Dian and Zeng, Xuan, "`Nonlinear CNN: improving CNNs with quadratic convolutions <https://link.springer.com/article/10.1007/s00521-019-04316-4>`_", in *Neural Computing and Applications*, pp. 8507-8516, Springer, 2020.
-.. [9] Mantini, Pranav and Shah, Shishr K, "`Cqnn: Convolutional quadratic neural networks <https://ieeexplore.ieee.org/abstract/document/9413207>`_", in *2020 25th International Conference on Pattern Recognition (ICPR)*, pp. 9819-9826, IEEE, 2021.
-.. [10] Goyal, Mohit and Goyal, Rajan and Lall, Brejesh, "`Improved polynomial neural networks with normalised activations <https://ieeexplore.ieee.org/abstract/document/9207535>`_", in *2020 International Joint Conference on Neural Networks (IJCNN)*, pp. 1-8, IEEE, 2020.
-.. [11] Liao, Jing-Xiao and Dong, Hang-Cheng and Sun, Zhi-Qi and Sun, Jinwei and Zhang, Shiping and Fan, Feng-Lei, "`Attention-embedded quadratic network (qttention) for effective and interpretable bearing fault diagnosis <https://ieeexplore.ieee.org/abstract/document/10076833>`_", in *IEEE Transactions on Instrumentation and Measurement*, pp. 1-13, IEEE, 2023.
-.. [12] Peng, Hanchuan and Xie, Peng and Liu, Lijuan and Kuang, Xiuli and Wang, Yimin and Qu, Lei and Gong, Hui and Jiang, Shengdian and Li, Anan and Ruan, Zongcai and others, "`Morphological diversity of single neurons in molecularly defined cell types <https://www.nature.com/articles/s41586-021-03941-1>`_", in *Nature*, pp. 174-181, Nature Publishing Group, 2021.
-.. [13] Hornik, Kurt and Stinchcombe, Maxwell and White, Halbert, "`Universal approximation of an unknown mapping and its derivatives using multilayer feedforward networks <https://www.sciencedirect.com/science/article/abs/pii/0893608090900056>`_", in *Neural Networks*, pp. 551-560, Elsevier, 1990.
-.. [14] Cramer, Nichael Lynn, "`A representation for the adaptive generation of simple sequential programs <https://dl.acm.org/doi/10.5555/645511.657085>`_", in *Proceedings of the First International Conference on Genetic Algorithms and Their Applications*, pp. 183-187, Psychology Press, 2014.
-.. [15] Hornik, Kurt and Stinchcombe, Maxwell and White, Halbert, "`Universal approximation of an unknown mapping and its derivatives using multilayer feedforward networks <https://www.semanticscholar.org/paper/Universal-approximation-of-an-unknown-mapping-and-Hornik-Stinchcombe/37807e97c624fb846df7e559553b32539ba2ea5d>`_", in *Neural Networks*, pp. 551-560, Elsevier, 1990.
-.. [16] Yarotsky, Dmitry, "`A representation for the adaptive generation of simple sequential programs <https://arxiv.org/pdf/1610.01145.pdf>`_", in *Neural Networks*, pp. 103-114, Elsevier, 2017.
+.. [1] Ronneberger, Olaf and Fischer, Philipp and Brox, Thomas, "`U-net: Convolutional networks for biomedical image segmentation <https://link.springer.com/chapter/10.1007/978-3-319-24574-4_28>`__", in *MICCAI*, pp. 234-241, Springer, 2015.
+.. [2] He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian, "`Deep residual learning for image recognition <https://openaccess.thecvf.com/content_cvpr_2016/html/He_Deep_Residual_Learning_CVPR_2016_paper.html>`__", in *CVPR*, pp. 770-778, Springer, 2016.
+.. [3] Fan, Fenglei and Wang, Dayang and Guo, Hengtao and Zhu, Qikui and Yan, Pingkun and Wang, Ge and Yu, Hengyong, "`On a sparse shortcut topology of artificial neural networks <https://ieeexplore.ieee.org/abstract/document/9614997>`__", in *IEEE Transactions on Artificial Intelligence*, IEEE, 2021.
+.. [4] Yang, Chengrun and Bender, Gabriel and Liu, Hanxiao and Kindermans, Pieter-Jan and Udell, Madeleine and Lu, Yifeng and Le, Quoc V and Huang, Da, "`TabNAS: Rejection Sampling for Neural Architecture Search on Tabular Datasets <https://proceedings.neurips.cc/paper_files/paper/2022/hash/4e392aa9bc70ed731d3c9c32810f92fb-Abstract-Conference.html>`__", in *Advances in Neural Information Processing Systems*, pp. 11906-11917, 2022.
+.. [5] Zador, Anthony and Richards, Blake and Olveczky, Bence and Escola, Sean and Bengio, Yoshua and Boahen, Kwabena and Botvinick, Matthew and Chklovskii, Dmitri and Churchland, Anne and Clopath, Claudia and others, "`Toward next-generation artificial intelligence: Catalyzing the neuroai revolution <https://arxiv.org/abs/2210.08340>`__", in *arXiv preprint arXiv:2210.08340*, 2022.
+.. [6] Chrysos, Grigoris and Moschoglou, Stylianos and Bouritsas, Giorgos and Deng, Jiankang and Panagakis, Yannis and Zafeiriou, Stefanos P, "`Deep Polynomial Neural Networks <https://ieeexplore.ieee.org/abstract/document/9353253>`__", in *IEEE Transactions on Pattern Analysis and Machine Intelligence*, 2021.
+.. [7] Fan, Feng-Lei and Li, Yingxin and Peng, Hanchuan and Zeng, Tieyong and Wang, Fei, "`Towards NeuroAI: Introducing Neuronal Diversity into Artificial Neural Networks <https://arxiv.org/abs/2301.09245>`__", in *arXiv preprint arXiv:2301.09245*, 2023.
+.. [8] Jiang, Yiyang and Yang, Fan and Zhu, Hengliang and Zhou, Dian and Zeng, Xuan, "`Nonlinear CNN: improving CNNs with quadratic convolutions <https://link.springer.com/article/10.1007/s00521-019-04316-4>`__", in *Neural Computing and Applications*, pp. 8507-8516, Springer, 2020.
+.. [9] Mantini, Pranav and Shah, Shishr K, "`Cqnn: Convolutional quadratic neural networks <https://ieeexplore.ieee.org/abstract/document/9413207>`__", in *2020 25th International Conference on Pattern Recognition (ICPR)*, pp. 9819-9826, IEEE, 2021.
+.. [10] Goyal, Mohit and Goyal, Rajan and Lall, Brejesh, "`Improved polynomial neural networks with normalised activations <https://ieeexplore.ieee.org/abstract/document/9207535>`__", in *2020 International Joint Conference on Neural Networks (IJCNN)*, pp. 1-8, IEEE, 2020.
+.. [11] Liao, Jing-Xiao and Dong, Hang-Cheng and Sun, Zhi-Qi and Sun, Jinwei and Zhang, Shiping and Fan, Feng-Lei, "`Attention-embedded quadratic network (qttention) for effective and interpretable bearing fault diagnosis <https://ieeexplore.ieee.org/abstract/document/10076833>`__", in *IEEE Transactions on Instrumentation and Measurement*, pp. 1-13, IEEE, 2023.
+.. [12] Peng, Hanchuan and Xie, Peng and Liu, Lijuan and Kuang, Xiuli and Wang, Yimin and Qu, Lei and Gong, Hui and Jiang, Shengdian and Li, Anan and Ruan, Zongcai and others, "`Morphological diversity of single neurons in molecularly defined cell types <https://www.nature.com/articles/s41586-021-03941-1>`__", in *Nature*, pp. 174-181, Nature Publishing Group, 2021.
+.. [13] Hornik, Kurt and Stinchcombe, Maxwell and White, Halbert, "`Universal approximation of an unknown mapping and its derivatives using multilayer feedforward networks <https://www.sciencedirect.com/science/article/abs/pii/0893608090900056>`__", in *Neural Networks*, pp. 551-560, Elsevier, 1990.
+.. [14] Cramer, Nichael Lynn, "`A representation for the adaptive generation of simple sequential programs <https://dl.acm.org/doi/10.5555/645511.657085>`__", in *Proceedings of the First International Conference on Genetic Algorithms and Their Applications*, pp. 183-187, Psychology Press, 2014.
+.. [15] Hornik, Kurt and Stinchcombe, Maxwell and White, Halbert, "`Universal approximation of an unknown mapping and its derivatives using multilayer feedforward networks <https://www.semanticscholar.org/paper/Universal-approximation-of-an-unknown-mapping-and-Hornik-Stinchcombe/37807e97c624fb846df7e559553b32539ba2ea5d>`__", in *Neural Networks*, pp. 551-560, Elsevier, 1990.
+.. [16] Yarotsky, Dmitry, "`Error bounds for approximations with deep ReLU networks <https://arxiv.org/abs/1610.01145>`__", in *Neural Networks*, pp. 103-114, Elsevier, 2017.

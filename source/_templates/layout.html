@@ -1,0 +1,35 @@
+{% extends "!layout.html" %}
+
+{% block mobile_nav %}
+  <button class="doc-menu-toggle" type="button" data-toggle="wy-nav-top" aria-label="Open navigation" aria-expanded="false" title="Open navigation">
+    <span class="fa fa-bars" aria-hidden="true"></span>
+  </button>
+  <a href="{{ pathto(master_doc) }}">{{ project }}</a>
+{% endblock %}
+
+{% block sidebartitle %}
+  {{ super() }}
+  <div class="doc-version">
+    <label for="doc-version-select">Version</label>
+    <select id="doc-version-select" aria-label="Documentation version">
+      <option value="{{ pathto('../index.html' if is_archive else 'index.html', 1) }}"{% if not is_archive %} selected{% endif %}>0.2.0</option>
+      <option value="{{ pathto('index.html' if is_archive else '0.1.1/index.html', 1) }}"{% if is_archive %} selected{% endif %}>0.1.1 (archive)</option>
+    </select>
+  </div>
+{% endblock %}
+
+{% block document %}
+  {% if is_archive %}
+    <aside class="archive-notice">
+      Archived 0.1.1 documentation.
+      <a href="{{ pathto('../index.html', 1) }}">Read the current 0.2.0 documentation.</a>
+    </aside>
+  {% endif %}
+  {% if pagename == 'index' and not is_archive %}
+    <div class="tnlearn-home">
+      {{ super() }}
+    </div>
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}

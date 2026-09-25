@@ -1,12 +1,12 @@
 
 # TNLearn: Task-based Neurons for learning
 
-![Alt text](./_static/logo.png "Optional title")
+![TNLearn logo](./_static/logo.png)
 
 
  Tnlearn is an open source python library. It is based on the symbolic regression algorithm to generate task-based neurons, and then utilizes diverse neurons to build neural networks.
 
-![Static Badge](https://img.shields.io/badge/Python-3.9%2B-brightgreen.svg) ![Static Badge](https://img.shields.io/badge/License-Apache%202.0-blue.svg) ![Static Badge](https://img.shields.io/badge/pypi-v0.1.0-orange?logo=PyPI) ![GitHub Repo stars](https://img.shields.io/github/stars/NewT123-WM/tnlearn?style=flat&logo=github)  
+This page preserves the early project overview and benchmark results.
 
 
 ## Motivation
@@ -27,11 +27,6 @@
 
 
 
-## Overview
-
-
-
-A nice picture describing the structure of tnlearn will be produced here.
 
 
 
@@ -61,7 +56,7 @@ We select several advanced machine learning methods for comparison.
 
 We test multiple advanced machine learning methods on two sets of real-world data. The test results (MSE) are shown in the following table:
 
-|       Method       | [Particle collision](https://www.kaggle.com/datasets/fedesoriano/cern-electron-collision-data) | [Asteroid prediction](https://www.kaggle.com/datasets/basu369victor/prediction-of-<br/>asteroid-diameter) |
+|       Method       | [Particle collision](https://www.kaggle.com/datasets/fedesoriano/cern-electron-collision-data) | [Asteroid prediction](https://www.kaggle.com/datasets/basu369victor/prediction-of-asteroid-diameter) |
 | :----------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
 |      XGBoost       |                      $0.0094\pm0.0006$                       |                      $0.0646\pm0.1031$                       |
 |      LightGBM      |                      $0.0056\pm0.0004$                       |                      $0.1391\pm0.1676$                       |
@@ -105,14 +100,10 @@ Other major dependencies are automatically installed when installing tnlearn.
 Tnlearn and its dependencies can be easily installed with pip:
 
 ```shell
-pip install tnlearn
+python -m pip install "tnlearn==0.1.1"
 ```
 
-Tnlearn and its dependencies can be easily installed with conda:
-
-```shell
-conda install -c tnlearn
-```
+Use a separate environment for this historical release.
 
 
 
@@ -145,43 +136,19 @@ clf.predict(X_test)
 
 
 
-There are many hyperparameters in tnlearn that can be debugged, making the neural network performance more superior. Please see the  [API documentation](#API documentation) for specific usage.
-
-
-
-## API documentation
-
-Here's our official API documentation, available on Read the Docs.
-
-
-
-## Citation
-
-If you find Tnlearn useful, please cite it in your publications.
-
-```bibtex
-@article{fan2026no,
-  title={No one-size-fits-all neurons: Task-based neurons for artificial neural networks},
-  author={Fan, Feng-Lei and Wang, Meng and Dong, Hang-Cheng and Ma, Jianwei and Zeng, Tieyong},
-  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
-  year={2026},
-  publisher={IEEE}
-}
-```
-
-
+See the [historical API reference](Page_4.rst) for estimator settings.
 
 
 
 ## The Team
 
-Tnlearn is a work by [Meng Wang](https://github.com/NewT123-WM), [Juntong Fan](https://github.com/Juntongkuki), [Tieyun LI](https://github.com/MillenRosen), and [Fenglei Fan](https://github.com/FengleiFan).
+Tnlearn is a work by [Meng Wang](https://github.com/NewT123-WM), [Juntong Fan](https://github.com/Juntongkuki), and [Fenglei Fan](https://github.com/FengleiFan).
 
 
 
 ## License
 
-Tnlearn is released under the Apache 2.0 License.
+Tnlearn is released under the BSD 3-Clause License.
 
 
 ## What's Next?

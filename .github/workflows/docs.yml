@@ -1,0 +1,19 @@
+name: Documentation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  html:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+          cache-dependency-path: source/requirements.txt
+      - run: python -m pip install -r source/requirements.txt
+      - run: make html SPHINXOPTS="-E -a -n -W --keep-going"
+      - run: python tools/check_links.py build/html
