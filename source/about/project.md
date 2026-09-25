@@ -29,7 +29,7 @@ The following contributor list follows the 0.2.0 source README:
 [Lizhao Xu](https://github.com/xlzion),
 [Zeyu Li](https://github.com/zyli-math),
 [Renfeng Peng](https://github.com/JimmyPeng1998),
-Yudong Wang,
+[Yudong Wang](https://github.com/yudongwang1002),
 [Can Dong](https://github.com/CanD3333),
 [Tansheng Zhu](https://github.com/tshzhu),
 [Liangchen Tan](https://github.com/Liangchen-0311),
@@ -38,6 +38,11 @@ Yudong Wang,
 [Yiqing Zhang](https://github.com/ZnGY9),
 [Kairan Zhang](https://github.com/zakarRoman), and
 [Fenglei Fan](https://github.com/FengleiFan).
+
+## Documentation maintainers
+
+- [Tieyun Li](https://github.com/MillenRosen)
+- [Meng Wang](https://github.com/NewT123-WM)
 
 ## License
 
