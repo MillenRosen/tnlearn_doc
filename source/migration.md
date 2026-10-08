@@ -8,7 +8,7 @@ simplified definition of vectorized symbolic regression, and includes
 functionality developed after 0.1.1 to support that formulation.
 
 The version selector opens the <a href="0.1.1/index.html">0.1.1 documentation archive</a>.
-Use it for the early background and API; use the pages here for 0.2.0,
+Use it for the early background and API; use the pages here for the current API,
 including its current legacy interfaces.
 
 ## Choose the expression mode explicitly

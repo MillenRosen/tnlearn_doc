@@ -70,6 +70,28 @@ Discover a formula through differentiable polynomial and tensor search.
 For search spaces, parameters, and tradeoffs, see
 [Choosing a symbolic regressor](../symbolic-regression/index.md).
 
+## Random neuron formulas
+
+These examples require the
+[0.2.1.dev0 source installation](../getting-started/installation.md#install-the-development-version).
+
+::::{container} example-list
+:::{container} example-item
+**[Random formula and MLP](../api/random-formulas.md#generate-a-formula-and-train-an-mlp)**
+
+Generate a reproducible formula without data, then train its network weights.
+
+{download}`random_formulas.py <../../examples/random_formulas.py>`
+:::
+:::{container} example-item
+**[Candidates by complexity](../api/random-formulas.md#filter-by-complexity)**
+
+Filter by term and variable counts within a limited attempt budget.
+
+{download}`random_candidates.py <../../examples/random_candidates.py>`
+:::
+::::
+
 ## PyTorch layers
 
 ::::{container} example-list

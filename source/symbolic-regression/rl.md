@@ -37,7 +37,7 @@ RL workflow from Appendix C.3 of the [package paper](../about/research.md).
 ```
 
 The paper describes a risk-seeking motivation and normalized discounted returns.
-The 0.2.0 implementation updates after each episode and clears its reward buffer
+The documented implementation updates after each episode and clears its reward buffer
 each time; it does not implement a separate elite-quantile or multi-episode
 risk-seeking update.
 

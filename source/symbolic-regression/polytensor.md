@@ -34,7 +34,7 @@ Conceptual design from Appendix C.4 of the [package paper](../about/research.md)
 ```
 
 ```{important}
-The paper figure includes a periodic (sine) stream. The 0.2.0
+The paper figure includes a periodic (sine) stream. The documented
 `PolyTensorRegressor` implements only the polynomial and CP interaction streams,
 including order-one interactions. It has no periodic-search option and supports
 only `method='cp'`. The separate historical `PolyTensorRegression` class

@@ -51,7 +51,7 @@ There is no implemented `random_state` parameter. Passing it through
 
 ## Provider configuration
 
-The following identifiers match the source README and the 0.2.0 client factory.
+The following identifiers match the source README and the current client factory.
 Model names are examples, not guarantees of provider availability.
 
 | Provider | Environment variable | Example `model` |
@@ -64,7 +64,7 @@ Model names are examples, not guarantees of provider availability.
 
 Provide the full `provider/model` identifier. For a local Ollama server, set
 `base_url` to its OpenAI-compatible endpoint, for example
-`http://127.0.0.1:11434/v1`; TNLearn 0.2.0 otherwise defaults to port 11111.
+`http://127.0.0.1:11434/v1`; the current client otherwise defaults to port 11111.
 Extra generation settings such as `temperature` in `llm_config` are not
 forwarded by the current client factory, and `fit` sets the client's token
 limit to 2048.

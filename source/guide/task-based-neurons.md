@@ -57,7 +57,7 @@ search budget. See [Choosing a symbolic regressor](../symbolic-regression/index.
 
 The [package paper](../about/research.md) explains the overall framework and
 the four search methods in Appendix C. The [expression guide](expressions.md)
-describes the supported syntax and parameterization rules in 0.2.0.
+describes the supported syntax and parameterization rules.
 
 For the earlier formulation, see the
 <a href="../0.1.1/Page_2.html">0.1.1 introduction</a>, including its explanations of

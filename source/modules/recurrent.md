@@ -58,7 +58,7 @@ Legacy sequence mode concatenates elementwise-transformed inputs and delegates
 to native PyTorch recurrent modules.
 
 These paths differ computationally and should not be assumed numerically
-identical to one another or to native PyTorch cells. In particular, the 0.2.0
+identical to one another or to native PyTorch cells. In particular, the current
 base GRU cell does not apply its computed reset gate in the candidate-state
 equation, so it is not an exact standard-GRU replacement.
 

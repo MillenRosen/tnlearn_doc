@@ -16,7 +16,7 @@ $$
 + \lambda_{\mathrm{node}} C_{\mathrm{tree}}.
 $$
 
-$N_{\mathrm{IP}}$ counts inner-product calls. In 0.2.0, the helper used for
+$N_{\mathrm{IP}}$ counts inner-product calls. The helper used for
 $C_{\mathrm{tree}}$ counts leaf nodes. Candidate outputs that retain a feature
 dimension are summed across that dimension for scoring. Expressions containing
 fewer than two occurrences of `x` are rejected.
@@ -82,7 +82,7 @@ output may still need aggregation. Use the MLP for the two-stage prediction work
 
 Advanced mode also searches `sin`, `cos`, `exp`, `log`, `tan`, and powers.
 Its search language is larger than the MLP evaluation language: `log` and
-`tan` are not implemented by the 0.2.0 base MLP evaluator.
+`tan` are not implemented by the current base MLP evaluator.
 
 `mode='legacy'` delegates to the historical `VecSymRegressor` and exports
 the `@` representation. Set the downstream MLP's `mode` to `'legacy'` as well.

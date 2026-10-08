@@ -48,9 +48,34 @@ Use fresh searcher instances when repeating experiments. LLM output depends
 on its external service and is not controlled by a TNLearn `random_state`
 setting.
 
+### Random formulas
+
+In 0.2.1.dev0, [RandomFormulaGenerator](../api/random-formulas.md) owns its
+Python and NumPy random streams. Equal seeds and equal sequences of method
+calls produce equal formula sequences in the same dependency environment.
+Repeated calls on one instance advance its state. `generate_for_combo` also
+uses deterministic candidate seeds and leaves both global random states alone.
+
+Keep formula-generation and network-training seeds separate. The MLP's
+`random_state` controls its initialization and training setup; it does not
+recreate a previously sampled formula. Save the formula string as part of the
+experiment record.
+
+### MLP initialization
+
+Starting in 0.2.1.dev0, the base-mode MLP regressor and classifier sort
+parameter symbols by name before creating and initializing their tensors.
+This fixes a source of cross-process differences: Python's hash seed can no
+longer change which initial weight is assigned to each symbol.
+
+This is an initialization guarantee under otherwise matching conditions.
+It does not make all training deterministic across devices, PyTorch versions,
+numerical libraries, or nondeterministic operations. Record the source commit
+and dependency versions along with the random seeds.
+
 ## Save and restore a regressor
 
-The inherited `load` method in 0.2.0 does not assign the newly built network
+The inherited `load` method still does not assign the newly built network
 to `net`. This example explicitly constructs it before loading its weights.
 It also retains preprocessing and the neuron expression in the running program.
 For a persisted application, store those settings alongside the checkpoint.
@@ -60,7 +85,18 @@ For a persisted application, store those settings alongside the checkpoint.
 :caption: examples/persistence.py
 ```
 
-Keep classifier label mappings with classification checkpoints. For cross-process
-base-mode restoration, verify predictions after loading: the MLP implementation
-constructs parameter lists from a set of SymPy symbols, so parameter ordering
-needs particular care. The example verifies an in-process round trip.
+Keep classifier label mappings with classification checkpoints. The example
+verifies an in-process round trip. For a cross-process restoration, also check
+predictions against a saved reference batch.
+
+### Restoring older checkpoints
+
+The older base-mode MLP code constructed parameter lists from an unordered
+set of symbols. A checkpoint stores tensor positions, which may not match the
+sorted symbol order used in 0.2.1.dev0. Matching tensor shapes and a successful
+load do not prove that the restored network computes the same function.
+
+Retain the original per-layer symbol-to-tensor mapping when migrating an old
+checkpoint. If that mapping was not saved, use the original environment and
+model to recover it and validate the conversion with reference predictions.
+The initialization fix does not automatically migrate older checkpoints.

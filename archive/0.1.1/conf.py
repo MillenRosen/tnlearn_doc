@@ -21,7 +21,7 @@ html_js_files = [
     ("../../_static/versions.js", {"defer": "defer"}),
     ("../../_static/docs.js", {"defer": "defer"}),
 ]
-html_context = {"is_archive": True}
+html_context = {"is_archive": True, "doc_channel": "archive", "version_root": "../"}
 html_theme_options = {
     "version_selector": False,
     "language_selector": False,

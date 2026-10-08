@@ -1,5 +1,6 @@
 """Run the exact CPU examples displayed in the documentation, without API calls."""
 
+import argparse
 import ast
 import os
 from pathlib import Path
@@ -10,7 +11,12 @@ from tempfile import TemporaryDirectory
 
 def main():
     root = Path(__file__).resolve().parents[1]
-    examples = sorted((root / "examples").glob("*.py"))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("examples_dir", nargs="?", type=Path, default=root / "examples")
+    args = parser.parse_args()
+    examples = sorted(args.examples_dir.resolve().glob("*.py"))
+    if not examples:
+        parser.error("No Python examples found in {}".format(args.examples_dir))
     env = dict(os.environ, OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", MPLBACKEND="Agg")
     failures = []
     checked = 0

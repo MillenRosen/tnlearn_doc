@@ -63,14 +63,31 @@ Use this instead of another server bound to the same port.
 
 ## Versions and appearance
 
-The main site documents 0.2.0. A compact sidebar selector opens the 0.1.1
-archive, built from `archive/0.1.1/` into `build/html/0.1.1/` with its own
-navigation and search index. The main build includes this step; the original
-checkout is not required on Read the Docs or in CI.
+The main site documents 0.2.1.dev0. The sidebar selector also opens the complete
+0.2.0 stable reference and the 0.1.1 historical archive. Each has its own
+navigation and search index.
+
+| Source | HTML output | Purpose |
+| --- | --- | --- |
+| `source/` and `examples/` | `build/html/` | Development API and examples |
+| `archive/0.2.0/` | `build/html/0.2.0/` | Frozen stable reference and example downloads |
+| `archive/0.1.1/` | `build/html/0.1.1/` | Early API, theory, and benchmarks |
+
+The main build includes both versioned builds. It uses only files in this
+repository, with no Git history or sibling TNLearn checkout required on
+Read the Docs or in CI. Version navigation is shared; stable content and its
+example sources remain frozen. These selector entries are paths within the
+same documentation build, independent of Read the Docs' project-level versions.
 
 The earliest snapshot and editorial adjustments are recorded in
 `archive/0.1.1/README.md`. Keep historical material in that archive;
-current legacy-mode features belong in the 0.2.0 reference.
+current legacy-mode features belong in the main reference. The 0.2.0 snapshot
+and its source commits are recorded in `archive/0.2.0/README.md`.
+
+When publishing a new stable release, save the previous reference and examples
+before changing the main version. Update version labels, installation commands,
+release notes, and archive build configuration together. Check all version
+selectors from nested pages and keep each search index scoped to its version.
 
 The stylesheet follows `prefers-color-scheme`. Original SVG figures also
 contain adaptive colors, so they follow the system preference without bitmap
@@ -81,16 +98,24 @@ screens as well as desktop layouts when changing tables or navigation.
 
 ## Check examples
 
-In a separate environment containing TNLearn 0.2.0:
+In a separate environment containing the documented development revision:
 
 ```bash
-python -m pip install "tnlearn==0.2.0"
+python -m pip install "tnlearn @ git+https://github.com/NewT123-WM/tnlearn.git@d5d6b01ff84d90d6f4539d45a898dd2fc7e9839f"
 python tools/check_examples.py
 ```
 
 This runs the local CPU examples, including forward/backward checks for layers
 and a checkpoint round trip. It excludes `examples/llm.py` because that file
 contacts an external provider and needs credentials. Run the LLM example
-explicitly only after configuring the provider. The documentation update was
-checked with Python 3.9 and PyTorch 2.5.1 CPU; this is not a full dependency
-compatibility matrix.
+explicitly only after configuring the provider. The examples also cover random
+formula generation and candidate filtering. The development update was checked
+with Python 3.9 and PyTorch 2.5.1 CPU; this is not a full dependency compatibility
+matrix.
+
+To validate the frozen examples, use a separate environment with TNLearn 0.2.0:
+
+```sh
+python -m pip install "tnlearn==0.2.0"
+python tools/check_examples.py archive/0.2.0/examples
+```

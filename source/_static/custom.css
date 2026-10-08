@@ -237,12 +237,13 @@ html.writer-html5 .rst-content .wy-table-responsive table.docutils th p:last-chi
     color: #ffffff;
     font-size: 14px;
 }
-.archive-notice {
+.archive-notice, .version-notice {
     margin-bottom: 24px;
     padding: 10px 14px;
     border-left: 3px solid var(--muted);
     background: var(--surface-alt);
-    font-size: 14px;
+    font-size: 16px;
+    line-height: 1.6;
 }
 .rst-content img { height: auto; }
 .rst-content img[src$=".svg"] { width: 100%; }

@@ -112,7 +112,7 @@ Base MLP weights use these shapes:
 Use distinct weight names for independent projections. Repeated names share
 parameters. Prefer a fully numeric discovered expression or a fully
 parameterized expression: mixing existing `wN` names with numbers can collide
-with the helper's counters, which start at 1 in 0.2.0.
+with the helper's counters, which start at 1.
 
 (parameterization-example)=
 ### Parameterization example
@@ -124,7 +124,7 @@ with the helper's counters, which start at 1 in 0.2.0.
 
 ## Base and legacy syntax
 
-| Property | Base mode, default in 0.2.0 | Current legacy mode |
+| Property | Base mode (default) | Current legacy mode |
 | --- | --- | --- |
 | Example | `<w1, x**2> + <w2, x>*<w3, x>` | `2@x**2 + 3@x` |
 | Discovery representation | Explicit inner products and their products | Simplified elementwise vectorized formulas |

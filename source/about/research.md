@@ -23,7 +23,7 @@ JMLR and is currently **under review**.
 | Appendix C.4: polynomial tensor search | [PolyTensorRegressor](../symbolic-regression/polytensor.md) |
 
 The paper provides the mathematical motivation and algorithm descriptions;
-the API pages follow the 0.2.0 source. In particular, the paper uses
+the API pages follow the documented 0.2.1.dev0 source. In particular, the paper uses
 feature-by-sample notation in places. The public examples store samples in
 rows and features in columns; `X` has shape `(n_samples, n_features)`.
 The PolyTensor periodic branch and
@@ -68,7 +68,7 @@ the original numerical results and baseline references. It reports comparisons
 against XGBoost, LightGBM, CatBoost,
 TabNet, TabTransformer, FT-Transformer, and DANETs on particle-collision and
 asteroid-diameter datasets. The small examples in this documentation verify
-API usage; they do not reproduce those experiments or establish a new 0.2.0
+API usage; they do not reproduce those experiments or establish a new
 performance claim.
 
 Related resources collected in the source README include

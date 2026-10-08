@@ -42,6 +42,11 @@ multi-output regression is not supported by this workflow.
 losses, and `input_dim`/`output_dim` record dimensions.
 Calling `fit` again rebuilds the network rather than continuing training.
 
+In 0.2.1.dev0, base-mode parameter symbols are sorted before initialization,
+so their weight assignments are independent of Python's hash seed. See
+[Reproducibility](../guide/training.md#reproducibility) for the scope of this
+fix and the seed settings to record.
+
 ## Example
 
 ```{literalinclude} ../../examples/regression.py
@@ -52,7 +57,9 @@ Calling `fit` again rebuilds the network rather than continuing training.
 ## Persistence
 
 Save the expression, architecture, preprocessing, and state dictionary together.
-The inherited 0.2.0 `load` method calls `build_model` without assigning its
+The inherited `load` method calls `build_model` without assigning its
 return value to `net`, so it cannot restore a fresh estimator by itself.
 See [Training and evaluation](../guide/training.md) for an explicit restoration
 example.
+For weights saved with 0.2.0, also check the
+[symbol-order migration notes](../guide/training.md#restoring-older-checkpoints).

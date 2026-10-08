@@ -1,0 +1,9 @@
+TNLearn logo.png is the project's existing logo.
+
+arxiv-logo.svg is the unchanged official white arXiv logo, used for the link
+to the TNLearn package paper hosted on arXiv.
+Source: https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-one-color-white.svg
+Brand assets and guidelines: https://info.arxiv.org/brand/logos.html
+The arXiv name and logo are registered trademarks of arXiv.
+
+UI and GitHub icons use Font Awesome, already bundled by sphinx_rtd_theme.

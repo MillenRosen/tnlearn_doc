@@ -53,7 +53,10 @@ def write_redirects(app, exception):
         target = new + ".html"
         destination = Path(app.outdir, old + ".html")
         destination.parent.mkdir(parents=True, exist_ok=True)
-        anchors = PAGE_ANCHORS.get(old, {})
+        anchors = {
+            key: value.replace("0.1.1/", app.config.legacy_archive_path + "/", 1)
+            for key, value in PAGE_ANCHORS.get(old, {}).items()
+        }
         destination.write_text(
             '<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<title>TNLearn documentation has moved</title>'
@@ -62,11 +65,12 @@ def write_redirects(app, exception):
             'location.replace(pages[location.hash.slice(1)] || '
             + json.dumps(target) + ');</script></head><body>'
             f'<p>This page has moved to <a href="{html.escape(target)}">'
-            'TNLearn 0.2.0 documentation</a>.</p></body></html>',
+            f'TNLearn {html.escape(app.config.release)} documentation</a>.</p></body></html>',
             encoding="utf-8",
         )
 
 
 def setup(app):
+    app.add_config_value("legacy_archive_path", "0.1.1", "html")
     app.connect("build-finished", write_redirects)
     return {"parallel_read_safe": True, "parallel_write_safe": True}

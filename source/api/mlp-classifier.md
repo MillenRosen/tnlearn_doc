@@ -37,6 +37,11 @@ classification, including string labels.
 `losses` and `train_accuracies`. There is no public `predict_proba` method
 in this release. The constructor's `save` option saves figures, not weights.
 
+In 0.2.1.dev0, base-mode parameter symbols are sorted before initialization,
+so their weight assignments are independent of Python's hash seed. See
+[Reproducibility](../guide/training.md#reproducibility) for the scope of this
+fix and the seed settings to record.
+
 ## Discovery and classification example
 
 PolyTensor accepts a classification objective. Its search labels must already
@@ -50,3 +55,5 @@ be indices, while MLPClassifier can receive the original labels.
 When restoring a classifier, retain `classes_` and `class_to_idx` as well as
 the expression, architecture, preprocessing, and weights. A weight file alone
 does not record the label mapping.
+For weights saved with 0.2.0, also check the
+[symbol-order migration notes](../guide/training.md#restoring-older-checkpoints).

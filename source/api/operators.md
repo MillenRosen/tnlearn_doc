@@ -54,7 +54,7 @@ an empty string.
 ```
 
 The export utility accepts `periodic=True` for a manually supplied structure.
-This does not mean that PolyTensorRegressor searches periodic terms in 0.2.0.
+PolyTensorRegressor does not search periodic terms in the documented version.
 The simplification helper `_simplify_expr` is internal; network constructors
 perform parsing and simplification automatically.
 

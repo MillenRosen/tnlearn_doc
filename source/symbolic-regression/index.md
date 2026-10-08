@@ -30,3 +30,12 @@ Use a two-dimensional feature matrix and a one-dimensional numeric target
 for GP, LLM, and RL. PolyTensor additionally accepts classification labels when
 `task_type='classification'`. All search results are structure proposals;
 downstream networks learn their own weights.
+
+## Random structures without fitting
+
+For a random baseline or a controlled comparison of expression complexity,
+use [Random neuron formulas](../api/random-formulas.md), added in 0.2.1.dev0.
+`RandomFormulaGenerator` samples formulas without training data or a fitness
+score. `generate_for_combo` filters them by string complexity. Pass a returned
+formula directly to a base-mode MLP with `already_parametrized=False`;
+there is no fitted `search.neuron` attribute for these utilities.
