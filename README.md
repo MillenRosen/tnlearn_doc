@@ -55,17 +55,16 @@ python tools/check_links.py build/html
 For runtime checks, use a separate environment with the library installed:
 
 ```bash
-python -m pip install "tnlearn @ git+https://github.com/NewT123-WM/tnlearn.git@d5d6b01ff84d90d6f4539d45a898dd2fc7e9839f"
+python -m pip install "tnlearn @ git+https://github.com/NewT123-WM/tnlearn.git"
 python tools/check_examples.py
 ```
 
 To validate a sibling source checkout, install `../tnlearn` instead.
-The development update targets source commit
-`d5d6b01ff84d90d6f4539d45a898dd2fc7e9839f` and was checked with Python 3.9
-and PyTorch 2.5.1 CPU. The LLM example is excluded from automated execution because it contacts
-an external provider. It is syntax-checked with the other examples; its
-search/export/training path was also checked separately with a fixed offline
-provider response.
+The development documentation follows the latest official `main` source and
+was checked with Python 3.9 and PyTorch 2.5.1 CPU. The LLM example is excluded
+from automated execution because it contacts an external provider. It is
+syntax-checked with the other examples; its search/export/training path was
+also checked separately with a fixed offline provider response.
 
 The 0.2.0 snapshot records its original source revision in
 `archive/0.2.0/README.md`. To check its examples against a separate 0.2.0

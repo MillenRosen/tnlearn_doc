@@ -2,26 +2,26 @@
 
 ## Install the development version
 
-These pages document **0.2.1.dev0** at source revision
-[`d5d6b01`](https://github.com/NewT123-WM/tnlearn/commit/d5d6b01ff84d90d6f4539d45a898dd2fc7e9839f).
-The random-formula APIs require this development code; they are not included
-in the published 0.2.0 package.
+These pages document **0.2.1.dev0**, built from the latest source on the
+official TNLearn `main` branch. The random-formula APIs require this
+development code; they are not included in the published 0.2.0 package.
 
-For a separate Conda environment and a reproducible source checkout:
+For a separate Conda environment and the latest official source:
 
 ```sh
 conda create -n tnlearn-dev python=3.11
 conda activate tnlearn-dev
 git clone https://github.com/NewT123-WM/tnlearn.git
 cd tnlearn
-git checkout d5d6b01ff84d90d6f4539d45a898dd2fc7e9839f
 python -m pip install -e .
 python -c "import tnlearn; print(tnlearn.__version__)"
 ```
 
-The version check should print `0.2.1.dev0`. The pinned commit keeps these
-examples aligned with the documented API. To follow ongoing development,
-switch the checkout to `main` and pull future updates; its behavior may change.
+The version check should report the development version exposed by the current
+checkout. To update an existing checkout before rebuilding, run
+`git pull --ff-only` on its `main` branch and reinstall with
+`python -m pip install -e .`. Development APIs can change as the official
+source evolves.
 
 For GPU use, install a PyTorch build appropriate for your hardware using the
 [official PyTorch selector](https://pytorch.org/get-started/locally/) before

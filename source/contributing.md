@@ -101,7 +101,7 @@ screens as well as desktop layouts when changing tables or navigation.
 In a separate environment containing the documented development revision:
 
 ```bash
-python -m pip install "tnlearn @ git+https://github.com/NewT123-WM/tnlearn.git@d5d6b01ff84d90d6f4539d45a898dd2fc7e9839f"
+python -m pip install "tnlearn @ git+https://github.com/NewT123-WM/tnlearn.git"
 python tools/check_examples.py
 ```
 
@@ -111,7 +111,8 @@ contacts an external provider and needs credentials. Run the LLM example
 explicitly only after configuring the provider. The examples also cover random
 formula generation and candidate filtering. The development update was checked
 with Python 3.9 and PyTorch 2.5.1 CPU; this is not a full dependency compatibility
-matrix.
+matrix. Because this command follows the official `main` branch, rerun it after
+source updates to check the current development API.
 
 To validate the frozen examples, use a separate environment with TNLearn 0.2.0:
 

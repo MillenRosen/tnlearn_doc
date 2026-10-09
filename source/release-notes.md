@@ -2,11 +2,10 @@
 
 ## 0.2.1.dev0 (development)
 
-This documentation describes the development source at
-[`d5d6b01`](https://github.com/NewT123-WM/tnlearn/commit/d5d6b01ff84d90d6f4539d45a898dd2fc7e9839f).
-The changes below are recorded as **Unreleased** in the library changelog.
-Install this [source revision](getting-started/installation.md#install-the-development-version)
-to use the new APIs.
+This documentation is built from the latest source on the official TNLearn
+`main` branch. The changes below are recorded as **Unreleased** in the library
+changelog. Follow the [development installation](getting-started/installation.md#install-the-development-version)
+to use the current APIs.
 
 ### Random neuron formulas
 
